@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128941670798",
+    "project_id": "jobseek-2d1c1",
+    "storage_bucket": "jobseek-2d1c1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128941670798:android:d05ae8b7455dd2b58a64df",
+        "android_client_info": {
+          "package_name": "com.app.jobseek"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDt3hDNdtCXiyHY7rVUf4Vtlo0p7xFo8_I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
