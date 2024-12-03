@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-paper";
 import Resources from "../../src/Resources";
-
+import { useNavigation } from "@react-navigation/native";
 const WebComponent = React.memo(
   ({
     passwordVisible,
@@ -18,7 +18,11 @@ const WebComponent = React.memo(
     setEmail,
     password,
     setPassword,
+    onClickSignUp
   }) => {
+
+    console.log("WebComponent");
+
     return (
       <View
         style={{
@@ -120,7 +124,7 @@ const WebComponent = React.memo(
           </TouchableOpacity>
 
           {/* Sign Up */}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onClickSignUp}>
             <Text style={styles.signUp}>
               Don’t have an account?{" "}
               <Text style={styles.signUpLink}>Sign up</Text>
@@ -136,7 +140,7 @@ const TextBannerComponent = () => {
   return (
     <View style={styles.logoContainer}>
     <View style={styles.logo} />
-    <Text style={styles.title}>Welcome to aLaborSeek</Text>
+    <Text style={styles.title}>Welcome to LaborSeek</Text>
     <Text style={styles.subtitle}>Login your email and password</Text>
   </View>
   )
@@ -149,7 +153,9 @@ const MobileComponent = React.memo(
     setEmail,
     password,
     setPassword,
+    onClickSignUp
   }) => {
+    console.log("MobileComponent");
     return (
       <View style={styles.container}>
         {/* Welcome Message */}
@@ -233,7 +239,7 @@ const MobileComponent = React.memo(
         </TouchableOpacity>
 
         {/* Sign Up */}
-        <TouchableOpacity>
+        <TouchableOpacity onPress={onClickSignUp}>
           <Text style={styles.signUp}>
             Don’t have an account?{" "}
             <Text style={styles.signUpLink}>Sign up</Text>
@@ -247,7 +253,11 @@ function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigation = useNavigation();
 
+  const onClickSignUp = React.useCallback(() => {
+    navigation.navigate("SignUp");
+  });
   if (Platform.OS === "web") {
     return (
       <WebComponent
@@ -257,6 +267,7 @@ function LoginScreen() {
         setEmail={setEmail}
         password={password}
         setPassword={setPassword}
+        onClickSignUp={onClickSignUp}
       />
     );
   }
@@ -269,6 +280,7 @@ function LoginScreen() {
       setEmail={setEmail}
       password={password}
       setPassword={setPassword}
+      onClickSignUp={onClickSignUp}
     />
   );
 }
