@@ -13,11 +13,11 @@ import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
 import SignUpInputField from "./components/SignUpInputField";
 import React from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
-import { updateProfile } from "firebase/auth";
+import sendEmailVerificationToUser from "../../utils/sendEmailVerification";
 
 function SignUpScreen() {
   const [firstName, setFirstName] = React.useState(null);
@@ -142,6 +142,7 @@ function SignUpScreen() {
       const user = userCredential.user;
       if (user) {
         await updateUser(user);
+      await sendEmailVerificationToUser(user);
         alert(
           "Account created successfully! Welcome, " + `${firstName} ${lastName}`
         );
