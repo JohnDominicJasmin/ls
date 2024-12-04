@@ -30,6 +30,7 @@ function initFirebase() {
       firebaseApp = initializeApp(firebaseConfig); // Initialize Firebase Web SDK
       getAnalytics(firebaseApp); // Optional for analytics on the web
       firebaseAuth = getAuth(firebaseApp); // Get Firebase Auth service
+      
         firebaseFirestore = getFirestore(firebaseApp); // Get Firebase Firestore service
         firebaseStorage = getStorage(firebaseApp); // Get Firebase Storage service
 

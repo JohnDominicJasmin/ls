@@ -13,11 +13,10 @@ import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
 import SignUpInputField from "./components/SignUpInputField";
 import React from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile,  } from "firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
-import sendEmailVerificationToUser from "../../utils/sendEmailVerification";
 
 function SignUpScreen() {
   const [firstName, setFirstName] = React.useState(null);
@@ -108,7 +107,9 @@ function SignUpScreen() {
     },
     [confirmPassword, confirmPasswordError]
   );
-
+  const navigateToEmailVerification = React.useCallback(() => { 
+    navigation.navigate("EmailVerification", {email: email});
+  },[email]);
   const handleSignUp = React.useCallback(async () => {
     setIsLoading(true);
 
@@ -120,12 +121,13 @@ function SignUpScreen() {
       return;
     }
     try {
+        
      
         let userCredential;
         if(Platform.OS === 'web'){
           userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
         }else{
-        userCredential = await auth().createUserWithEmailAndPassword(email, password);
+          userCredential = await auth().createUserWithEmailAndPassword(email, password);
         }
 
         const updateUser = async (user) => {
@@ -142,10 +144,7 @@ function SignUpScreen() {
       const user = userCredential.user;
       if (user) {
         await updateUser(user);
-      await sendEmailVerificationToUser(user);
-        alert(
-          "Account created successfully! Welcome, " + `${firstName} ${lastName}`
-        );
+        navigateToEmailVerification();
       }
       setIsLoading(false);
     } catch (error) {
@@ -158,7 +157,11 @@ function SignUpScreen() {
         setEmailError("Invalid email!");
       } else if (error.code === "auth/weak-password") {
         setConfirmPasswordError("Weak password!");
-      } else {
+      } else if (error.code === "auth/network-request-failed") {
+        alert("Network error occurred! Please try again.");
+      }
+      
+      else {
         alert("An error occurred while creating your account!"+error);
       }
     }
