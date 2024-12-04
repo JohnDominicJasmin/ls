@@ -12,6 +12,27 @@ function EmailVerification({route}) {
     const [timer, setTimer] = useState(DEFAULT_TIMER); // Initialize timer at 60 seconds
     const [isRunning, setIsRunning] = useState(true);
   
+    const [isVerified, setIsVerified] = useState(false);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const user = Platform.OS === 'web' ? firebaseAuth.currentUser : auth().currentUser;
+        if (user) {
+          user.reload() // Refresh user data from Firebase
+            .then(() => {
+              setIsVerified(user.emailVerified);
+              if (user.emailVerified) {
+                //navigate to home page
+                clearInterval(interval); // Stop the interval if verified
+              }
+            })
+            .catch((error) => console.error('Error reloading user:', error));
+        }
+      }, 1500);
+  
+      return () => clearInterval(interval); // Cleanup the interval on component unmount
+    }, []);
+
     const verifyEmail = React.useCallback(() => {
         const mailto = `mailto:${email}`;
         
