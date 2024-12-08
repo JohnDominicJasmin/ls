@@ -4,23 +4,31 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  SafeAreaView,
   StyleSheet,
   Platform,
 } from "react-native";
 import { TextInput } from "react-native-paper";
 import Resources from "../../src/Resources";
 import { useNavigation } from "@react-navigation/native";
+import { firebaseAuth } from "../../firebaseconfig";
+import auth from "@react-native-firebase/auth";
+import Spinner from "react-native-loading-spinner-overlay";
 const WebComponent = React.memo(
   ({
+    emailError,
+    passwordError,
     passwordVisible,
     setPasswordVisible,
     email,
     setEmail,
     password,
     setPassword,
-    onClickSignUp
+    onClickSignUp,
+    loginAccount,
   }) => {
-
     console.log("WebComponent");
 
     return (
@@ -44,34 +52,23 @@ const WebComponent = React.memo(
 
         <View style={[styles.container, { flex: 0.3 }]}>
           {/* Welcome Message */}
-          <TextBannerComponent /> 
+          <TextBannerComponent />
 
-          {/* Email Input */}
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            placeholder="Email"
-            label={"Email"}
-            keyboardType="email-address"
-            theme={{
-              colors: {
-                primary: Resources.colors.royalBlue,
-                text: "#000",
-                placeholder: "#aaa",
+          <View
+            style={[
+              {
+                width: "100%",
+                alignSelf: "center",
               },
-            }}
-          />
-
-          {/* Password Input */}
-          <View>
+            ]}
+          >
             <TextInput
-              value={password}
-              onChangeText={setPassword}
+              value={email}
+              onChangeText={setEmail}
               style={styles.input}
-              placeholder="Password"
-              label={"Password"}
-              secureTextEntry={!passwordVisible}
+              placeholder="Email"
+              label={"Email"}
+              keyboardType="email-address"
               theme={{
                 colors: {
                   primary: Resources.colors.royalBlue,
@@ -80,6 +77,51 @@ const WebComponent = React.memo(
                 },
               }}
             />
+
+            <Text
+              style={{
+                color: Resources.colors.red,
+                fontSize: 12,
+              }}
+            >
+              {emailError || ""}
+            </Text>
+          </View>
+          {/* Password Input */}
+          <View>
+            <View
+              style={[
+                {
+                  width: "100%",
+                  alignSelf: "center",
+                },
+              ]}
+            >
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                style={styles.input}
+                placeholder="Password"
+                label={"Password"}
+                secureTextEntry={!passwordVisible}
+                theme={{
+                  colors: {
+                    primary: Resources.colors.royalBlue,
+                    text: "#000",
+                    placeholder: "#aaa",
+                  },
+                }}
+              />
+
+              <Text
+                style={{
+                  color: Resources.colors.red,
+                  fontSize: 12,
+                }}
+              >
+                {passwordError || ""}
+              </Text>
+            </View>
 
             <TouchableOpacity
               onPress={() => setPasswordVisible((prev) => !prev)}
@@ -109,7 +151,7 @@ const WebComponent = React.memo(
           </TouchableOpacity>
 
           {/* Login Button */}
-          <TouchableOpacity style={styles.loginButton}>
+          <TouchableOpacity onPress={loginAccount} style={styles.loginButton}>
             <Text style={styles.loginButtonText}>Login</Text>
           </TouchableOpacity>
 
@@ -139,54 +181,51 @@ const WebComponent = React.memo(
 const TextBannerComponent = () => {
   return (
     <View style={styles.logoContainer}>
-    <View style={styles.logo} />
-    <Text style={styles.title}>Welcome to LaborSeek</Text>
-    <Text style={styles.subtitle}>Login your email and password</Text>
-  </View>
-  )
-}
+      <View style={styles.logo} />
+      <Text style={styles.title}>Welcome to LaborSeek</Text>
+      <Text style={styles.subtitle}>Login your email and password</Text>
+    </View>
+  );
+};
 const MobileComponent = React.memo(
   ({
+    emailError,
+    passwordError,
     passwordVisible,
     setPasswordVisible,
     email,
     setEmail,
     password,
     setPassword,
-    onClickSignUp
+    onClickSignUp,
+    loginAccount,
   }) => {
     console.log("MobileComponent");
     return (
+      <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <SafeAreaView>
+            <ScrollView>
       <View style={styles.container}>
         {/* Welcome Message */}
-        <TextBannerComponent /> 
-       
-        {/* Email Input */}
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          style={styles.input}
-          placeholder="Email"
-          label={"Email"}
-          keyboardType="email-address"
-          theme={{
-            colors: {
-              primary: Resources.colors.royalBlue,
-              text: "#000",
-              placeholder: "#aaa",
+        <TextBannerComponent />
+        <View
+          style={[
+            {
+              width: "100%",
+              alignSelf: "center",
             },
-          }}
-        />
-
-        {/* Password Input */}
-        <View>
+          ]}
+        >
           <TextInput
-            value={password}
-            onChangeText={setPassword}
+            value={email}
+            onChangeText={setEmail}
             style={styles.input}
-            placeholder="Password"
-            label={"Password"}
-            secureTextEntry={!passwordVisible}
+            placeholder="Email"
+            label={"Email"}
+            keyboardType="email-address"
             theme={{
               colors: {
                 primary: Resources.colors.royalBlue,
@@ -195,6 +234,51 @@ const MobileComponent = React.memo(
               },
             }}
           />
+
+          <Text
+            style={{
+              color: Resources.colors.red,
+              fontSize: 12,
+            }}
+          >
+            {emailError || ""}
+          </Text>
+        </View>
+
+        {/* Password Input */}
+        <View>
+          <View
+            style={[
+              {
+                width: "100%",
+                alignSelf: "center",
+              },
+            ]}
+          >
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              style={styles.input}
+              placeholder="Password"
+              label={"Password"}
+              secureTextEntry={!passwordVisible}
+              theme={{
+                colors: {
+                  primary: Resources.colors.royalBlue,
+                  text: "#000",
+                  placeholder: "#aaa",
+                },
+              }}
+            />
+            <Text
+              style={{
+                color: Resources.colors.red,
+                fontSize: 12,
+              }}
+            >
+              {passwordError || ""}
+            </Text>
+          </View>
 
           <TouchableOpacity
             onPress={() => setPasswordVisible((prev) => !prev)}
@@ -224,7 +308,7 @@ const MobileComponent = React.memo(
         </TouchableOpacity>
 
         {/* Login Button */}
-        <TouchableOpacity style={styles.loginButton}>
+        <TouchableOpacity onPress={loginAccount} style={styles.loginButton}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
@@ -246,43 +330,121 @@ const MobileComponent = React.memo(
           </Text>
         </TouchableOpacity>
       </View>
+      </ScrollView>
+      </SafeAreaView>
+      </KeyboardAvoidingView>
     );
   }
 );
 function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(null);
+  const [emailError, setEmailError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+
   const navigation = useNavigation();
 
   const onClickSignUp = React.useCallback(() => {
     navigation.navigate("SignUp");
   });
-  if (Platform.OS === "web") {
-    return (
-      <WebComponent
-        passwordVisible={passwordVisible}
-        setPasswordVisible={setPasswordVisible}
-        email={email}
-        setEmail={setEmail}
-        password={password}
-        setPassword={setPassword}
-        onClickSignUp={onClickSignUp}
-      />
-    );
-  }
+
+  const loginAccount = React.useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const authentication = Platform.OS === "web" ? firebaseAuth : auth();
+      const firebaseUser = await authentication.currentUser;
+      await authentication.signInWithEmailAndPassword(email, password);
+      setIsLoading(false);
+      console.log("User signed in!"+firebaseUser.emailVerified);
+      if(!firebaseUser.emailVerified){
+        navigation.navigate("EmailVerification", { email: email });
+        return;
+      }
+      //navigate to home page 
+
+    } catch (e) {
+      console.error(e);
+      setIsLoading(false);
+      if (e.code === "auth/invalid-email") {
+        setEmailError("Invalid email");
+      } else if (e.code === "auth/user-not-found") {
+        setEmailError("User not found");
+      } else if (e.code === "auth/wrong-password") {
+        setPasswordError("Wrong password");
+      } else if (e.code === "auth/invalid-credential") {
+        alert("Invalid email or password. Please try again");
+      }
+    }
+  });
+
+  const updateEmail = React.useCallback(
+    (value) => {
+      setEmail(value);
+      setEmailError(null);
+    },
+    [email, emailError]
+  );
+
+  const updatePassword = React.useCallback(
+    (value) => {
+      setPassword(value);
+      setPasswordError(null);
+    },
+    [password, passwordError]
+  );
 
   return (
-    <MobileComponent
-      passwordVisible={passwordVisible}
-      setPasswordVisible={setPasswordVisible}
-      email={email}
-      setEmail={setEmail}
-      password={password}
-      setPassword={setPassword}
-      onClickSignUp={onClickSignUp}
-    />
+    <>
+  
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: Resources.colors.white,
+          }}
+        >
+          <Spinner
+            visible={isLoading}
+            textContent={"Loading..."}
+            textStyle={styles.spinnerTextStyle}
+          />
+
+              {Platform.OS === "web" && (
+                <WebComponent
+                  emailError={emailError}
+                  passwordError={passwordError}
+                  passwordVisible={passwordVisible}
+                  setPasswordVisible={setPasswordVisible}
+                  email={email}
+                  setEmail={updateEmail}
+                  password={password}
+                  setPassword={updatePassword}
+                  onClickSignUp={onClickSignUp}
+                  loginAccount={loginAccount}
+                />
+              )}
+
+              {Platform.OS !== "web" && (
+                <MobileComponent
+                  emailError={emailError}
+                  passwordError={passwordError}
+                  passwordVisible={passwordVisible}
+                  setPasswordVisible={setPasswordVisible}
+                  email={email}
+                  setEmail={updateEmail}
+                  password={password}
+                  setPassword={updatePassword}
+                  onClickSignUp={onClickSignUp}
+                  loginAccount={loginAccount}
+                />
+              )}
+        </View>
+    
+    </>
   );
+
+  
 }
 
 const styles = StyleSheet.create({
@@ -314,13 +476,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 5,
   },
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
   input: {
     borderBottomWidth: 1,
     borderColor: Resources.colors.royalBlue,
     backgroundColor: "white",
     fontSize: 16,
-    paddingVertical: 10,
-    marginBottom: 20,
+    paddingTop: 10,
+    marginBottom: 4,
   },
   passwordContainer: {
     flexDirection: "row",
