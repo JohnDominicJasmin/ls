@@ -4,22 +4,24 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import firebase from '@react-native-firebase/app';
-
+import { getDatabase } from "firebase/database";
 import { getAnalytics } from 'firebase/analytics';
 const firebaseConfig = {
-  apiKey: "AIzaSyA5dzBBalkN5LkqzpYJEhUYalF7iTpnpao",
-  authDomain: "jobseek-2d1c1.firebaseapp.com",
-  projectId: "jobseek-2d1c1",
-  storageBucket: "jobseek-2d1c1.firebasestorage.app",
-  messagingSenderId: "128941670798",
-  appId: "1:128941670798:web:7fe23770b9ff66cd8a64df",
-  measurementId: "G-GS938P6W5F", // Only for Web
-};
+    apiKey: "AIzaSyA5dzBBalkN5LkqzpYJEhUYalF7iTpnpao",
+    authDomain: "jobseek-2d1c1.firebaseapp.com",
+    databaseURL: "https://jobseek-2d1c1-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "jobseek-2d1c1",
+    storageBucket: "jobseek-2d1c1.firebasestorage.app",
+    messagingSenderId: "128941670798",
+    appId: "1:128941670798:web:7fe23770b9ff66cd8a64df",
+    measurementId: "G-GS938P6W5F"
+  };
 
 let firebaseApp;
 let firebaseAuth;
 let firebaseFirestore;
 let firebaseStorage;
+let firebaseDb;
 function initFirebase() {
   console.log('Initializing Firebase...');
 
@@ -30,9 +32,10 @@ function initFirebase() {
       firebaseApp = initializeApp(firebaseConfig); // Initialize Firebase Web SDK
       getAnalytics(firebaseApp); // Optional for analytics on the web
       firebaseAuth = getAuth(firebaseApp); // Get Firebase Auth service
-      
+
         firebaseFirestore = getFirestore(firebaseApp); // Get Firebase Firestore service
         firebaseStorage = getStorage(firebaseApp); // Get Firebase Storage service
+        firebaseDb = getDatabase(firebaseApp); // Get Firebase Realtime Database service
 
     } else {
       console.log('Already connected with Firebase (Web)');
@@ -49,4 +52,4 @@ function initFirebase() {
   }
 }
 
-export {initFirebase, firebaseApp, firebaseAuth, firebaseFirestore, firebaseStorage};
+export {initFirebase, firebaseApp, firebaseAuth, firebaseFirestore, firebaseStorage, firebaseDb};

@@ -5,14 +5,23 @@ import Resources from "../../src/Resources";
 import sendEmailVerificationToUser from "../../utils/sendEmailVerification";
 import auth from "@react-native-firebase/auth";
 import { firebaseAuth } from "../../firebaseconfig";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 function EmailVerification({route}) {
     const DEFAULT_TIMER = 60;
     const { email } = route.params;
-
+    const navigation = useNavigation();
     const [timer, setTimer] = useState(DEFAULT_TIMER); // Initialize timer at 60 seconds
     const [isRunning, setIsRunning] = useState(true);
-  
-    const [isVerified, setIsVerified] = useState(false);
+    const navigateToHome = (navigation) => {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: 'Home' }, // The screen you want to navigate to
+          ],
+        })
+      );
+    };
 
     useEffect(() => {
       const interval = setInterval(() => {
@@ -20,9 +29,8 @@ function EmailVerification({route}) {
         if (user) {
           user.reload() // Refresh user data from Firebase
             .then(() => {
-              setIsVerified(user.emailVerified);
               if (user.emailVerified) {
-                //navigate to home page
+                navigateToHome(navigation)
                 clearInterval(interval); // Stop the interval if verified
               }
             })
@@ -76,7 +84,13 @@ function EmailVerification({route}) {
     };
     useLayoutEffect(() => {
         const sendEmail = async () => {
-        sendEmailVerificationToUser(await currentUser());
+          sendEmailVerificationToUser(await currentUser(), {
+            onSuccess: () => {
+  
+            }, onFailure: () => {
+  
+            }
+          });
 
         }
         sendEmail()
@@ -89,7 +103,13 @@ function EmailVerification({route}) {
     const resendEmail = React.useCallback((async() => {
         if(isRunning) return;
 
-        sendEmailVerificationToUser(await currentUser());
+        sendEmailVerificationToUser(await currentUser(), {
+          onSuccess: () => {
+
+          }, onFailure: () => {
+
+          }
+        })
         startTimer();
 }), [isRunning, timer]);
   

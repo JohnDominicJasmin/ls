@@ -14,8 +14,10 @@ import { TextInput } from "react-native-paper";
 import Resources from "../../src/Resources";
 import { useNavigation } from "@react-navigation/native";
 import { firebaseAuth } from "../../firebaseconfig";
-import auth from "@react-native-firebase/auth";
-import Spinner from "react-native-loading-spinner-overlay";
+import auth, { firebase } from "@react-native-firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import Spinner from "react-native-loading-spinner-overlay"; 
+import signInAnonymously from "../../utils/signInAnonymously"
 const WebComponent = React.memo(
   ({
     emailError,
@@ -128,7 +130,7 @@ const WebComponent = React.memo(
               style={{
                 position: "absolute",
                 right: 12,
-                bottom: 50,
+                bottom: 30,
               }}
             >
               <Image
@@ -198,140 +200,144 @@ const MobileComponent = React.memo(
     password,
     setPassword,
     onClickSignUp,
+    signInAsGuest,
     loginAccount,
   }) => {
     console.log("MobileComponent");
     return (
       <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <SafeAreaView>
-            <ScrollView>
-      <View style={styles.container}>
-        {/* Welcome Message */}
-        <TextBannerComponent />
-        <View
-          style={[
-            {
-              width: "100%",
-              alignSelf: "center",
-            },
-          ]}
-        >
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-            placeholder="Email"
-            label={"Email"}
-            keyboardType="email-address"
-            theme={{
-              colors: {
-                primary: Resources.colors.royalBlue,
-                text: "#000",
-                placeholder: "#aaa",
-              },
-            }}
-          />
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <SafeAreaView>
+          <ScrollView>
+            <View style={styles.container}>
+              {/* Welcome Message */}
+              <TextBannerComponent />
+              <View
+                style={[
+                  {
+                    width: "100%",
+                    alignSelf: "center",
+                  },
+                ]}
+              >
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  style={styles.input}
+                  placeholder="Email"
+                  label={"Email"}
+                  keyboardType="email-address"
+                  theme={{
+                    colors: {
+                      primary: Resources.colors.royalBlue,
+                      text: "#000",
+                      placeholder: "#aaa",
+                    },
+                  }}
+                />
 
-          <Text
-            style={{
-              color: Resources.colors.red,
-              fontSize: 12,
-            }}
-          >
-            {emailError || ""}
-          </Text>
-        </View>
+                <Text
+                  style={{
+                    color: Resources.colors.red,
+                    fontSize: 12,
+                  }}
+                >
+                  {emailError || ""}
+                </Text>
+              </View>
 
-        {/* Password Input */}
-        <View>
-          <View
-            style={[
-              {
-                width: "100%",
-                alignSelf: "center",
-              },
-            ]}
-          >
-            <TextInput
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              placeholder="Password"
-              label={"Password"}
-              secureTextEntry={!passwordVisible}
-              theme={{
-                colors: {
-                  primary: Resources.colors.royalBlue,
-                  text: "#000",
-                  placeholder: "#aaa",
-                },
-              }}
-            />
-            <Text
-              style={{
-                color: Resources.colors.red,
-                fontSize: 12,
-              }}
-            >
-              {passwordError || ""}
-            </Text>
-          </View>
+              {/* Password Input */}
+              <View>
+                <View
+                  style={[
+                    {
+                      width: "100%",
+                      alignSelf: "center",
+                    },
+                  ]}
+                >
+                  <TextInput
+                    value={password}
+                    onChangeText={setPassword}
+                    style={styles.input}
+                    placeholder="Password"
+                    label={"Password"}
+                    secureTextEntry={!passwordVisible}
+                    theme={{
+                      colors: {
+                        primary: Resources.colors.royalBlue,
+                        text: "#000",
+                        placeholder: "#aaa",
+                      },
+                    }}
+                  />
+                  <Text
+                    style={{
+                      color: Resources.colors.red,
+                      fontSize: 12,
+                    }}
+                  >
+                    {passwordError || ""}
+                  </Text>
+                </View>
 
-          <TouchableOpacity
-            onPress={() => setPasswordVisible((prev) => !prev)}
-            style={{
-              position: "absolute",
-              right: 12,
-              bottom: 50,
-            }}
-          >
-            <Image
-              style={{
-                width: 24,
-                height: 24,
-              }}
-              source={
-                passwordVisible
-                  ? Resources.icons.ic_eye_open
-                  : Resources.icons.ic_eye_close
-              }
-            />
-          </TouchableOpacity>
-        </View>
+                <TouchableOpacity
+                  onPress={() => setPasswordVisible((prev) => !prev)}
+                  style={{
+                    position: "absolute",
+                    right: 12,
+                    bottom: 50,
+                  }}
+                >
+                  <Image
+                    style={{
+                      width: 24,
+                      height: 24,
+                    }}
+                    source={
+                      passwordVisible
+                        ? Resources.icons.ic_eye_open
+                        : Resources.icons.ic_eye_close
+                    }
+                  />
+                </TouchableOpacity>
+              </View>
 
-        {/* Forgot Password */}
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        </TouchableOpacity>
+              {/* Forgot Password */}
+              <TouchableOpacity>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </TouchableOpacity>
 
-        {/* Login Button */}
-        <TouchableOpacity onPress={loginAccount} style={styles.loginButton}>
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
+              {/* Login Button */}
+              <TouchableOpacity
+                onPress={loginAccount}
+                style={styles.loginButton}
+              >
+                <Text style={styles.loginButtonText}>Login</Text>
+              </TouchableOpacity>
 
-        {/* Guest Login */}
-        <View style={styles.divider}>
-          <View style={styles.line} />
-          <Text style={styles.dividerText}>or login as a guest user</Text>
-          <View style={styles.line} />
-        </View>
-        <TouchableOpacity style={styles.guestButton}>
-          <Text style={styles.guestButtonText}>Login as Guest User</Text>
-        </TouchableOpacity>
+              {/* Guest Login */}
+              <View style={styles.divider}>
+                <View style={styles.line} />
+                <Text style={styles.dividerText}>or login as a guest user</Text>
+                <View style={styles.line} />
+              </View>
+              <TouchableOpacity onPress={signInAsGuest} style={styles.guestButton}>
+                <Text style={styles.guestButtonText}>Login as Guest User</Text>
+              </TouchableOpacity>
 
-        {/* Sign Up */}
-        <TouchableOpacity onPress={onClickSignUp}>
-          <Text style={styles.signUp}>
-            Don’t have an account?{" "}
-            <Text style={styles.signUpLink}>Sign up</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-      </ScrollView>
-      </SafeAreaView>
+              {/* Sign Up */}
+              <TouchableOpacity onPress={onClickSignUp}>
+                <Text style={styles.signUp}>
+                  Don’t have an account?{" "}
+                  <Text style={styles.signUpLink}>Sign up</Text>
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
       </KeyboardAvoidingView>
     );
   }
@@ -349,21 +355,54 @@ function LoginScreen() {
   const onClickSignUp = React.useCallback(() => {
     navigation.navigate("SignUp");
   });
-
+  const signIn = React.useCallback(async () => {
+    try {
+      let userCredential;
+  
+      if (Platform.OS === "web") {
+        // Sign in using Firebase Web SDK
+        userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      } else {
+        // Sign in using React Native Firebase SDK
+        userCredential = await auth().signInWithEmailAndPassword(email, password);
+      }
+  
+      // Check if the email is verified
+      if (userCredential.user.emailVerified) {
+        console.log("Sign in successful and email is verified");
+        return userCredential; // Return the userCredential for further use
+      } else {
+        console.warn("Email is not verified. Please verify your email.");
+        return null; // Or handle unverified email case as needed
+      }
+    } catch (error) {
+      console.error("Sign in failed: ", error.message);
+      throw error; // Rethrow the error to handle it in the calling code
+    }
+  }, [email, password]);
+  
+  const signInAsGuest = React.useCallback(async () => {
+    try{
+      signInAnonymously({onSuccess: () => {
+        console.log(`Signing in anon:`)
+      navigation.navigate("Home");
+      }, onFailure: (error) => {
+        console.error(`signInAnonymously error: ${error.message}`)
+      }})
+      
+    }catch(e){
+    }
+  })
   const loginAccount = React.useCallback(async () => {
     try {
       setIsLoading(true);
-      const authentication = Platform.OS === "web" ? firebaseAuth : auth();
-      const firebaseUser = await authentication.currentUser;
-      await authentication.signInWithEmailAndPassword(email, password);
-      setIsLoading(false);
-      console.log("User signed in!"+firebaseUser.emailVerified);
-      if(!firebaseUser.emailVerified){
-        navigation.navigate("EmailVerification", { email: email });
+      const userCredential = await signIn();
+      if (!userCredential.user?.emailVerified) {
+        navigation.navigate("EmailVerification", { email: userCredential.user.email });
         return;
       }
-      //navigate to home page 
-
+      //navigate to home page
+      navigation.navigate("Home");
     } catch (e) {
       console.error(e);
       setIsLoading(false);
@@ -397,54 +436,51 @@ function LoginScreen() {
 
   return (
     <>
-  
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: Resources.colors.white,
-          }}
-        >
-          <Spinner
-            visible={isLoading}
-            textContent={"Loading..."}
-            textStyle={styles.spinnerTextStyle}
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: Resources.colors.white,
+        }}
+      >
+        <Spinner
+          visible={isLoading}
+          textContent={"Loading..."}
+          textStyle={styles.spinnerTextStyle}
+        />
+
+        {Platform.OS === "web" && (
+          <WebComponent
+            emailError={emailError}
+            passwordError={passwordError}
+            passwordVisible={passwordVisible}
+            setPasswordVisible={setPasswordVisible}
+            email={email}
+            setEmail={updateEmail}
+            password={password}
+            setPassword={updatePassword}
+            onClickSignUp={onClickSignUp}
+            loginAccount={loginAccount}
           />
+        )}
 
-              {Platform.OS === "web" && (
-                <WebComponent
-                  emailError={emailError}
-                  passwordError={passwordError}
-                  passwordVisible={passwordVisible}
-                  setPasswordVisible={setPasswordVisible}
-                  email={email}
-                  setEmail={updateEmail}
-                  password={password}
-                  setPassword={updatePassword}
-                  onClickSignUp={onClickSignUp}
-                  loginAccount={loginAccount}
-                />
-              )}
-
-              {Platform.OS !== "web" && (
-                <MobileComponent
-                  emailError={emailError}
-                  passwordError={passwordError}
-                  passwordVisible={passwordVisible}
-                  setPasswordVisible={setPasswordVisible}
-                  email={email}
-                  setEmail={updateEmail}
-                  password={password}
-                  setPassword={updatePassword}
-                  onClickSignUp={onClickSignUp}
-                  loginAccount={loginAccount}
-                />
-              )}
-        </View>
-    
+        {Platform.OS !== "web" && (
+          <MobileComponent
+            emailError={emailError}
+            passwordError={passwordError}
+            passwordVisible={passwordVisible}
+            setPasswordVisible={setPasswordVisible}
+            email={email}
+            signInAsGuest={signInAsGuest}
+            setEmail={updateEmail}
+            password={password}
+            setPassword={updatePassword}
+            onClickSignUp={onClickSignUp}
+            loginAccount={loginAccount}
+          />
+        )}
+      </View>
     </>
   );
-
-  
 }
 
 const styles = StyleSheet.create({

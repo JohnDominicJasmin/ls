@@ -222,7 +222,7 @@ function SignUpScreen() {
                   }}
                 >
                   {
-                    "Create your account to start hiring trusted home service professionals near you."
+                    "Create your account to book trusted home services quickly and conveniently for you"
                   }
                 </Text>
               </View>

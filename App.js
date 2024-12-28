@@ -7,7 +7,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 LogBox.ignoreLogs(['Setting a timer']); // Ignore timer warnings
 
 const App = () => {
-  console.log('App.js');
   return (
 
     <GestureHandlerRootView style={{ flex: 1 }}>
