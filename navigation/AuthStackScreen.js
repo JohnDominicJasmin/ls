@@ -26,8 +26,17 @@ const AuthenticationStackScreen = () => {
           // Use onAuthStateChanged to listen for user state
           onAuthStateChanged(firebaseAuth, (user) => {
             console.log('Web - User state changed:', user);
-            setInitialRoute(user ? "Home" : "Login");
             setLoading(false); // Stop loading
+
+            if(user.isAnonymous){
+              setInitialRoute("Login")
+              return;
+            }
+            if(user.emailVerified){
+              setInitialRoute("Home")
+              return;
+            }
+            setInitialRoute("Login")
           });
         } catch (error) {
           console.error('Error checking user on web:', error);
@@ -35,9 +44,17 @@ const AuthenticationStackScreen = () => {
       } else {
         // For React Native Mobile
         const user = auth().currentUser;
-        console.log('Mobile - Current user:', user);
-        setInitialRoute(user ? "Home" : "Login");
-        setLoading(false); // Stop loading
+        setLoading(false); 
+
+        if(user.isAnonymous){
+          setInitialRoute("Login")
+          return;
+        }
+        if(user.emailVerified){
+          setInitialRoute("Home")
+          return;
+        }
+        setInitialRoute("Login")
       }
     };
 

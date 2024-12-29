@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   ScrollView,
   FlatList,
+  Dimensions,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Resources from "../../src/Resources";
@@ -17,7 +18,23 @@ import { firebaseAuth } from "../../firebaseconfig";
 import auth, { firebase } from "@react-native-firebase/auth";
 import SearchBar from "../auth/components/SearchBar";
 import mockData from "../../data/mockData";
-function WebComponent({ user: user }) {
+import { useNavigation } from "@react-navigation/native";
+
+const { width, height } = Dimensions.get("window");
+
+function WebComponent({ user: user, onClickSignIn, onClickSignUp }) {
+  const data = mockData();
+  const renderItem = ({ item, index }) => {
+    return (
+      <View style={[styles.gridItem, { marginHorizontal: 16 }]}>
+        <View style={styles.gridCircle}>
+          <Image style={styles.gridIcon} source={item.icon} />
+        </View>
+
+        <Text style={styles.itemText}>{item.serviceName}</Text>
+      </View>
+    );
+  };
   return (
     <View
       style={{
@@ -25,6 +42,8 @@ function WebComponent({ user: user }) {
         width: "100%",
         height: "100%",
         flexDirection: "column",
+        paddingHorizontal: 32,
+        paddingVertical: 16,
       }}
     >
       <View
@@ -38,7 +57,7 @@ function WebComponent({ user: user }) {
           gap: 8,
         }}
       >
-        <SearchBar styleContainer={{ marginTop: 16 }} />
+        {/* <SearchBar styleContainer={{ marginTop: 16 }} /> */}
         <ProfileImage user={user} />
         <NotificationButton />
 
@@ -50,13 +69,15 @@ function WebComponent({ user: user }) {
             paddingHorizontal: 16,
           }}
         >
-          <Text
-            style={{
-              color: Resources.colors.royalBlue,
-            }}
-          >
-            {"Log In"}
-          </Text>
+          <TouchableOpacity onPress={onClickSignIn}>
+            <Text
+              style={{
+                color: Resources.colors.royalBlue,
+              }}
+            >
+              {"Log In"}
+            </Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={{
@@ -64,7 +85,7 @@ function WebComponent({ user: user }) {
               borderRadius: 8,
               backgroundColor: Resources.colors.royalBlue_1,
             }}
-            onPress={{}}
+            onPress={ onClickSignUp }
           >
             <Text
               style={{
@@ -80,22 +101,67 @@ function WebComponent({ user: user }) {
       <View
         style={{
           flexDirection: "column",
-          borderWidth: 1,
         }}
       >
         <View
           style={{
             flexDirection: "column",
             width: "auto",
-            borderWidth: 1,
             borderColor: "red",
             justifyContent: "flex-start",
             gap: 8,
           }}
         >
-          <Text>{"Hello, Guest User"}</Text>
-          <Text>{"Welcome back to LaborSeek!"}</Text>
+          {user?.displayName && user ? (
+            <Text style={styles.helloTextWeb}>
+              {"Hello, " + user?.displayName}
+            </Text>
+          ) : (
+            <Text style={styles.helloTextWeb}>{"Hello, Guest User"}</Text>
+          )}
+          <Text
+            style={{
+              color: Resources.colors.gray_1,
+              fontSize: 20,
+            }}
+          >
+            {"Welcome back to LaborSeek!"}
+          </Text>
         </View>
+
+        <View
+          style={{
+            paddingVertical: 24,
+            justifyContent: "center",
+            alignContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <FlatList
+            data={data.home_page.services}
+            horizontal={true}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.grid}
+          />
+        </View>
+      </View>
+
+      <View
+        style={{
+          flex: 1,
+          alignContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Image
+          source={Resources.images.ic_home_page_banner_web}
+          style={{
+            resizeMode: "center",
+            width: width * 0.5,
+            height: height * 0.5,
+          }}
+        />
       </View>
     </View>
   );
@@ -121,10 +187,12 @@ function MobileComponent({ user: user }) {
               >
                 <ProfileImage user={user} />
 
-                {user?.displayName && (
+                {user?.displayName && user ? (
                   <Text style={styles.helloText}>
                     {"Hello, " + user?.displayName}
                   </Text>
+                ) : (
+                  <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
                 )}
               </View>
               <TouchableOpacity style={{}}>
@@ -142,7 +210,7 @@ function MobileComponent({ user: user }) {
               {"Welcome back to LaborSeek!"}
             </Text>
 
-            <SearchBar styleContainer={{ marginTop: 16 }} />
+            {/* <SearchBar styleContainer={{ marginTop: 16 }} /> */}
             <GridCategories />
             <PosterImage />
           </View>
@@ -278,8 +346,16 @@ const GridCategories = () => {
 };
 
 export default function HomeScreen() {
-  const [user, setUser] = useState(null);
+  const navigation = useNavigation()
 
+  const [user, setUser] = useState(null);
+  const onClickSignIn = React.useCallback(() => {
+    navigation.navigate("Login")
+  
+  },[])
+  const onClickSignUp = React.useCallback(() => {
+    navigation.navigate("SignUp")
+  })
   useEffect(() => {
     const fetchUser = async () => {
       let currentUser;
@@ -302,7 +378,7 @@ export default function HomeScreen() {
   }, [user]);
 
   if (Platform.OS === "web") {
-    return <WebComponent user={user} />;
+    return <WebComponent user={user} onClickSignIn={onClickSignIn} onClickSignUp={onClickSignUp}/>;
   }
 
   return <MobileComponent user={user} />;
@@ -319,6 +395,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: Resources.colors.black,
   },
+  helloTextWeb: {
+    fontSize: 48,
+    color: Resources.colors.black,
+  },
+
   roundImage: {
     width: 44, // Set width
     height: 44, // Set height (equal to width for a circle)

@@ -47,7 +47,7 @@ function initFirebase() {
       firebaseApp = firebase.initializeApp(firebaseConfig); // Initialize Firebase Mobile SDK
     } else {
       console.log('Already connected with Firebase (Mobile)');
-      firebaseApp = firebase.app(); // Use the default Firebase app
+      firebaseApp = firebase.app() // Use the default Firebase app
     }
   }
 }

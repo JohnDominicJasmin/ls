@@ -17,7 +17,7 @@ import { firebaseAuth } from "../../firebaseconfig";
 import auth, { firebase } from "@react-native-firebase/auth";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay"; 
-import signInAnonymously from "../../utils/signInAnonymously"
+import signInAsAnonymous from "../../utils/signInAnonymously"
 const WebComponent = React.memo(
   ({
     emailError,
@@ -29,6 +29,7 @@ const WebComponent = React.memo(
     password,
     setPassword,
     onClickSignUp,
+    signInAsGuest,
     loginAccount,
   }) => {
     console.log("WebComponent");
@@ -163,7 +164,7 @@ const WebComponent = React.memo(
             <Text style={styles.dividerText}>or login as a guest user</Text>
             <View style={styles.line} />
           </View>
-          <TouchableOpacity style={styles.guestButton}>
+          <TouchableOpacity onPress={signInAsGuest} style={styles.guestButton}>
             <Text style={styles.guestButtonText}>Login as Guest User</Text>
           </TouchableOpacity>
 
@@ -383,7 +384,7 @@ function LoginScreen() {
   
   const signInAsGuest = React.useCallback(async () => {
     try{
-      signInAnonymously({onSuccess: () => {
+      signInAsAnonymous({onSuccess: () => {
         console.log(`Signing in anon:`)
       navigation.navigate("Home");
       }, onFailure: (error) => {
@@ -460,6 +461,8 @@ function LoginScreen() {
             setPassword={updatePassword}
             onClickSignUp={onClickSignUp}
             loginAccount={loginAccount}
+            signInAsGuest={signInAsGuest}
+
           />
         )}
 

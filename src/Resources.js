@@ -29,7 +29,9 @@ const Resources = {
     images: {
         ic_banner: require('../assets/images/ic_banner.png'),
         ic_check_email: require('../assets/images/ic_check_email.png'),
-        ic_home_page_banner: require('../assets/images/home_page_poster.png')
+        ic_home_page_banner: require('../assets/images/home_page_poster.png'),
+        ic_home_page_banner_web: require('../assets/images/ic_home_page_banner_web.png')
+        
    
     },
     mockIcons : {
