@@ -8,14 +8,16 @@ import { browserLocalPersistence, onAuthStateChanged } from 'firebase/auth';
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import EmailVerification from '../screens/auth/EmailVerification';
+import NotificationScreen from '../screens/jobs/NotificationsScreen'
+import ForgotPassword from '../screens/auth/ForgotPassword';
+import { MainTabNavigator } from './MainTabNavigator';
 import HomeScreen from '../screens/jobs/HomeScreen';
-
 const Stack = createStackNavigator();
 
 const AuthenticationStackScreen = () => {
   const [initialRoute, setInitialRoute] = useState(null); // Initialize as null to wait for user check
   const [loading, setLoading] = useState(true); // Add loading state
-
+  const isWeb = Platform.OS === 'web'; 
   useEffect(() => {
     const checkUser = async () => {
       if (Platform.OS === 'web') {
@@ -33,7 +35,7 @@ const AuthenticationStackScreen = () => {
               return;
             }
             if(user.emailVerified){
-              setInitialRoute("Home")
+              setInitialRoute("Main")
               return;
             }
             setInitialRoute("Login")
@@ -51,7 +53,7 @@ const AuthenticationStackScreen = () => {
           return;
         }
         if(user.emailVerified){
-          setInitialRoute("Home")
+          setInitialRoute("Main")
           return;
         }
         setInitialRoute("Login")
@@ -61,7 +63,6 @@ const AuthenticationStackScreen = () => {
     checkUser();
   }, []);
 
-  // Show a loading indicator while checking user state
   if (loading) {
     return null; // Replace with a loading spinner or splash screen if needed
   }
@@ -73,7 +74,13 @@ const AuthenticationStackScreen = () => {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EmailVerification" component={EmailVerification} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+        {!isWeb ? (
+          <Stack.Screen name="Main" component={MainTabNavigator} options={{ headerShown: false }} />
+        ) : ( <Stack.Screen name="Main" component={HomeScreen} options={{ headerShown: false }} />)}
+        
+        <Stack.Screen name="Notification" component={NotificationScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }}/>
+     
       </Stack.Navigator>
     </>
   );

@@ -14,8 +14,8 @@ import { TextInput } from "react-native-paper";
 import Resources from "../../src/Resources";
 import { useNavigation } from "@react-navigation/native";
 import { firebaseAuth } from "../../firebaseconfig";
-import auth, { firebase } from "@react-native-firebase/auth";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import auth, { firebase, } from "@react-native-firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay"; 
 import signInAsAnonymous from "../../utils/signInAnonymously"
 const WebComponent = React.memo(
@@ -31,6 +31,7 @@ const WebComponent = React.memo(
     onClickSignUp,
     signInAsGuest,
     loginAccount,
+    onClickForgotPassword
   }) => {
     console.log("WebComponent");
 
@@ -149,7 +150,7 @@ const WebComponent = React.memo(
           </View>
 
           {/* Forgot Password */}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onClickForgotPassword}>
             <Text style={styles.forgotPassword}>Forgot Password?</Text>
           </TouchableOpacity>
 
@@ -184,7 +185,8 @@ const WebComponent = React.memo(
 const TextBannerComponent = () => {
   return (
     <View style={styles.logoContainer}>
-      <View style={styles.logo} />
+      {/* <View style={styles.logo} /> */}
+      <Image style={{height: 75, width: 75}} source={Resources.icons.app_logo}/>
       <Text style={styles.title}>Welcome to LaborSeek</Text>
       <Text style={styles.subtitle}>Login your email and password</Text>
     </View>
@@ -203,6 +205,7 @@ const MobileComponent = React.memo(
     onClickSignUp,
     signInAsGuest,
     loginAccount,
+    onClickForgotPassword,
   }) => {
     console.log("MobileComponent");
     return (
@@ -307,7 +310,7 @@ const MobileComponent = React.memo(
               </View>
 
               {/* Forgot Password */}
-              <TouchableOpacity>
+              <TouchableOpacity onPress={onClickForgotPassword}>
                 <Text style={styles.forgotPassword}>Forgot Password?</Text>
               </TouchableOpacity>
 
@@ -386,6 +389,8 @@ function LoginScreen() {
     try{
       signInAsAnonymous({onSuccess: () => {
         console.log(`Signing in anon:`)
+      navigation.replace('Main'); // Replace to go directly to MainTabNavigator without the option to go back
+
       navigation.navigate("Home");
       }, onFailure: (error) => {
         console.error(`signInAnonymously error: ${error.message}`)
@@ -403,7 +408,9 @@ function LoginScreen() {
         return;
       }
       //navigate to home page
-      navigation.navigate("Home");
+      navigation.replace('Main'); // Replace to go directly to MainTabNavigator without the option to go back
+      // Then navigate to Home within the MainTabNavigator
+      navigation.navigate('Home');
     } catch (e) {
       console.error(e);
       setIsLoading(false);
@@ -435,6 +442,10 @@ function LoginScreen() {
     [password, passwordError]
   );
 
+  const onClickForgotPassword = React.useCallback(() => {
+    navigation.navigate("ForgotPassword")
+  }, [])
+
   return (
     <>
       <View
@@ -462,6 +473,7 @@ function LoginScreen() {
             onClickSignUp={onClickSignUp}
             loginAccount={loginAccount}
             signInAsGuest={signInAsGuest}
+            onClickForgotPassword={onClickForgotPassword}
 
           />
         )}
@@ -479,6 +491,8 @@ function LoginScreen() {
             setPassword={updatePassword}
             onClickSignUp={onClickSignUp}
             loginAccount={loginAccount}
+            onClickForgotPassword={onClickForgotPassword}
+
           />
         )}
       </View>

@@ -24,13 +24,17 @@ const Resources = {
         ic_calendar: require('../assets/icons/ic_calendar.png'),
         ic_home: require('../assets/icons/ic_home.png'),
         ic_person: require('../assets/icons/ic_person.png'),
-
+        ic_notification_bell: require('../assets/icons/ic_notification_bell.png'),
+        ic_rocket: require('../assets/icons/ic_rocket.png'),
+        ic_calendar_bookings: require('../assets/icons/ic_calendar_bookings.png'),
+        app_logo: require('../assets/icons/app_logo.png')
     },
     images: {
         ic_banner: require('../assets/images/ic_banner.png'),
         ic_check_email: require('../assets/images/ic_check_email.png'),
         ic_home_page_banner: require('../assets/images/home_page_poster.png'),
-        ic_home_page_banner_web: require('../assets/images/ic_home_page_banner_web.png')
+        ic_home_page_banner_web: require('../assets/images/ic_home_page_banner_web.png'),
+        ic_forgot_password: require('../assets/images/ic_forgot_password.png')
         
    
     },

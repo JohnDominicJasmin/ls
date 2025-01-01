@@ -18,12 +18,17 @@ import { firebaseAuth } from "../../firebaseconfig";
 import auth, { firebase } from "@react-native-firebase/auth";
 import SearchBar from "../auth/components/SearchBar";
 import mockData from "../../data/mockData";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 
 function WebComponent({ user: user, onClickSignIn, onClickSignUp }) {
   const data = mockData();
+  const [shouldShowNotification, setShouldShowNotification] = useState(false);
+  const onClickNotification = React.useCallback(() => {
+    setShouldShowNotification((prev) => !prev)
+  }, []);
+  
   const renderItem = ({ item, index }) => {
     return (
       <View style={[styles.gridItem, { marginHorizontal: 16 }]}>
@@ -57,45 +62,58 @@ function WebComponent({ user: user, onClickSignIn, onClickSignUp }) {
           gap: 8,
         }}
       >
-        {/* <SearchBar styleContainer={{ marginTop: 16 }} /> */}
-        <ProfileImage user={user} />
-        <NotificationButton />
-
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 16,
-            paddingHorizontal: 16,
+            flex: 1,
+            marginLeft: 32,
           }}
         >
-          <TouchableOpacity onPress={onClickSignIn}>
-            <Text
-              style={{
-                color: Resources.colors.royalBlue,
-              }}
-            >
-              {"Log In"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{
-              padding: 12,
-              borderRadius: 8,
-              backgroundColor: Resources.colors.royalBlue_1,
-            }}
-            onPress={ onClickSignUp }
-          >
-            <Text
-              style={{
-                color: Resources.colors.royalBlue,
-              }}
-            >
-              {"Sign Up"}
-            </Text>
-          </TouchableOpacity>
+          <Image
+            source={Resources.icons.app_logo}
+            style={{ height: 64, width: 64 }}
+          />
         </View>
+        {/* <SearchBar styleContainer={{ marginTop: 16 }} /> */}
+        <ProfileImage user={user} />
+        <NotificationButton onPress={onClickNotification} shouldShowNotification={shouldShowNotification}/>
+
+        {user && user.isAnonymous && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 16,
+              paddingHorizontal: 16,
+            }}
+          >
+            <TouchableOpacity onPress={onClickSignIn}>
+              <Text
+                style={{
+                  color: Resources.colors.royalBlue,
+                }}
+              >
+                {"Log In"}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                padding: 12,
+                borderRadius: 8,
+                backgroundColor: Resources.colors.royalBlue_1,
+              }}
+              onPress={onClickSignUp}
+            >
+              <Text
+                style={{
+                  color: Resources.colors.royalBlue,
+                }}
+              >
+                {"Sign Up"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View
@@ -167,71 +185,134 @@ function WebComponent({ user: user, onClickSignIn, onClickSignUp }) {
   );
 }
 
-function MobileComponent({ user: user }) {
+function MobileComponent({ user, navigateNotification }) {
+  const route = useRoute();
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <SafeAreaView>
-        <ScrollView>
-          <View style={styles.parentContainer}>
-            <View style={styles.topNavigationContainer}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  flex: 1,
-                }}
-              >
-                <ProfileImage user={user} />
-
-                {user?.displayName && user ? (
-                  <Text style={styles.helloText}>
-                    {"Hello, " + user?.displayName}
-                  </Text>
-                ) : (
-                  <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
-                )}
-              </View>
-              <TouchableOpacity style={{}}>
-                <Image
+        <View
+          style={{
+            height: "100%",
+            flexDirection: "column",
+          }}
+        >
+          <ScrollView>
+            <View style={styles.parentContainer}>
+              <View style={styles.topNavigationContainer}>
+                <View
                   style={{
-                    width: 32,
-                    height: 32,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 8,
+                    flex: 1,
                   }}
-                  source={Resources.icons.ic_notification}
-                />
-              </TouchableOpacity>
+                >
+                  <ProfileImage user={user} />
+
+                  {user?.displayName && user ? (
+                    <Text style={styles.helloText}>
+                      {"Hello, " + user?.displayName}
+                    </Text>
+                  ) : (
+                    <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
+                  )}
+                </View>
+                <TouchableOpacity onPress={navigateNotification}>
+                  <Image
+                    style={{
+                      width: 32,
+                      height: 32,
+                    }}
+                    source={Resources.icons.ic_notification}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.welcomeText}>
+                {"Welcome back to LaborSeek!"}
+              </Text>
+
+              {/* <SearchBar styleContainer={{ marginTop: 16 }} /> */}
+              <GridCategories />
+              <PosterImage />
             </View>
-
-            <Text style={styles.welcomeText}>
-              {"Welcome back to LaborSeek!"}
-            </Text>
-
-            {/* <SearchBar styleContainer={{ marginTop: 16 }} /> */}
-            <GridCategories />
-            <PosterImage />
-          </View>
-        </ScrollView>
-        <BottomNavigation />
+          </ScrollView>
+        </View>
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
 
-const NotificationButton = ({ onPress }) => {
+const NoNotificationsYet = () => {
   return (
-    <TouchableOpacity onPress={onPress} style={{}}>
-      <Image
+    <View
+      style={{
+        justifyContent: "center",
+        alignContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Text
         style={{
-          width: 32,
-          height: 32,
+          textAlign: "center",
+          fontWeight: "semibold",
+          fontSize: 20,
+          color: Resources.colors.black,
         }}
-        source={Resources.icons.ic_notification}
-      />
-    </TouchableOpacity>
+      >
+        {"No Notification yet"}
+      </Text>
+      <Text
+        style={{
+          textAlign: "center",
+          fontSize: 12,
+          marginHorizontal: 30,
+          marginTop: 8,
+        }}
+      >
+        {
+          "Any updates or important information will appear here, so check back soon to stay in the loop with your bookings and service alerts."
+        }
+      </Text>
+    </View>
+  );
+};
+const NotificationButton = ({ onPress, shouldShowNotification }) => {
+  return (
+    <View>
+      <TouchableOpacity onPress={onPress} style={{}}>
+        <Image
+          style={{
+            width: 32,
+            height: 32,
+          }}
+          source={Resources.icons.ic_notification}
+        />
+      </TouchableOpacity>
+
+      {shouldShowNotification && (
+        <View
+          style={{
+            width: 329,
+            height: 390,
+            position: "absolute",
+            right: 0,
+            top: 0,
+            elevation: 2,
+            shadowRadius: 1.5,
+            shadowOpacity: 0.4,
+            borderRadius: 16,
+            marginTop: 44,
+            justifyContent: "center",
+          }}
+        >
+          <NoNotificationsYet />
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -255,67 +336,6 @@ const PosterImage = () => {
       style={styles.posterImage}
       source={Resources.images.ic_home_page_banner}
     />
-  );
-};
-
-const BottomNavigation = () => {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        width: "100%",
-        paddingVertical: 8,
-      }}
-    >
-      <BottomNavigationItem
-        style={{ flex: 1 }}
-        textLabel={"Home"}
-        imageSource={Resources.icons.ic_home}
-      />
-      <BottomNavigationItem
-        style={{ flex: 1 }}
-        textLabel={"Bookings"}
-        imageSource={Resources.icons.ic_calendar}
-      />
-      <BottomNavigationItem
-        style={{ flex: 1 }}
-        textLabel={"Profile"}
-        imageSource={Resources.icons.ic_person}
-      />
-    </View>
-  );
-};
-
-const BottomNavigationItem = ({ style, textLabel, imageSource }) => {
-  return (
-    <View
-      style={[
-        {
-          flexDirection: "column",
-          alignItems: "center",
-        },
-        style,
-      ]}
-    >
-      <Image
-        style={{
-          tintColor: Resources.colors.gray_1,
-          width: 24,
-          height: 24,
-        }}
-        source={imageSource}
-      />
-
-      <Text
-        style={{
-          color: Resources.colors.gray_1,
-          fontSize: 13,
-          fontWeight: "300",
-        }}
-      >
-        {textLabel}
-      </Text>
-    </View>
   );
 };
 
@@ -346,16 +366,15 @@ const GridCategories = () => {
 };
 
 export default function HomeScreen() {
-  const navigation = useNavigation()
-
+  const navigation = useNavigation();
+  const route = useRoute();
   const [user, setUser] = useState(null);
   const onClickSignIn = React.useCallback(() => {
-    navigation.navigate("Login")
-  
-  },[])
+    navigation.navigate("Login");
+  }, []);
   const onClickSignUp = React.useCallback(() => {
-    navigation.navigate("SignUp")
-  })
+    navigation.navigate("SignUp");
+  });
   useEffect(() => {
     const fetchUser = async () => {
       let currentUser;
@@ -366,6 +385,7 @@ export default function HomeScreen() {
       }
 
       setUser(currentUser); // Set the user state
+      console.log("Current user is" + currentUser);
     };
 
     fetchUser();
@@ -377,11 +397,36 @@ export default function HomeScreen() {
     );
   }, [user]);
 
+  const navigateToScreen = React.useCallback(
+    (screenRoute) => {
+      if (route.name === screenRoute) {
+        console.log(`Already on the ${screenRoute} screen`);
+        return; // Do nothing if already on the target screen
+      }
+
+      navigation.navigate(screenRoute);
+    },
+    [route.name, navigation]
+  );
+
   if (Platform.OS === "web") {
-    return <WebComponent user={user} onClickSignIn={onClickSignIn} onClickSignUp={onClickSignUp}/>;
+    return (
+      <WebComponent
+        user={user}
+        onClickSignIn={onClickSignIn}
+        onClickSignUp={onClickSignUp}
+      />
+    );
   }
 
-  return <MobileComponent user={user} />;
+  return (
+    <MobileComponent
+      user={user}
+      navigateNotification={() => {
+        navigateToScreen("Notification");
+      }}
+    />
+  );
 }
 
 const styles = StyleSheet.create({
