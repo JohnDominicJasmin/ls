@@ -35,7 +35,7 @@ function initFirebase() {
 
         firebaseFirestore = getFirestore(firebaseApp); // Get Firebase Firestore service
         firebaseStorage = getStorage(firebaseApp); // Get Firebase Storage service
-        firebaseDb = getDatabase(firebaseApp); // Get Firebase Realtime Database service
+        firebaseDb = getDatabase(firebaseApp) // Get Firebase Realtime Database service
 
     } else {
       console.log('Already connected with Firebase (Web)');

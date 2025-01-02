@@ -27,7 +27,10 @@ const Resources = {
         ic_notification_bell: require('../assets/icons/ic_notification_bell.png'),
         ic_rocket: require('../assets/icons/ic_rocket.png'),
         ic_calendar_bookings: require('../assets/icons/ic_calendar_bookings.png'),
-        app_logo: require('../assets/icons/app_logo.png')
+        app_logo: require('../assets/icons/app_logo.png'),
+        ic_diamond_premium: require('../assets/icons/ic_diamond_premium.png'),
+        ic_logout: require('../assets/icons/ic_logout.png'),
+        ic_setting: require('../assets/icons/ic_setting.png'),
     },
     images: {
         ic_banner: require('../assets/images/ic_banner.png'),

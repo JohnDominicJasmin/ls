@@ -8,7 +8,7 @@ import { browserLocalPersistence, onAuthStateChanged } from 'firebase/auth';
 import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import EmailVerification from '../screens/auth/EmailVerification';
-import NotificationScreen from '../screens/jobs/NotificationsScreen'
+import {NotificationScreen} from '../screens/jobs/NotificationsScreen'
 import ForgotPassword from '../screens/auth/ForgotPassword';
 import { MainTabNavigator } from './MainTabNavigator';
 import HomeScreen from '../screens/jobs/HomeScreen';
