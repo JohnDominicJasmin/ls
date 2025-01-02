@@ -12,6 +12,9 @@ import {NotificationScreen} from '../screens/jobs/NotificationsScreen'
 import ForgotPassword from '../screens/auth/ForgotPassword';
 import { MainTabNavigator } from './MainTabNavigator';
 import HomeScreen from '../screens/jobs/HomeScreen';
+import PremiumAccountScreen from '../screens/jobs/PremiumAccountScreen';
+import SettingScreen from '../screens/jobs/SettingScreen';
+
 const Stack = createStackNavigator();
 
 const AuthenticationStackScreen = () => {
@@ -77,6 +80,11 @@ const AuthenticationStackScreen = () => {
         {!isWeb ? (
           <Stack.Screen name="Main" component={MainTabNavigator} options={{ headerShown: false }} />
         ) : ( <Stack.Screen name="Main" component={HomeScreen} options={{ headerShown: false }} />)}
+        
+
+
+              <Stack.Screen name="PremiumAccount" component={PremiumAccountScreen}  options={{ headerShown: false }} />
+              <Stack.Screen name="Settings" component={SettingScreen}  options={{ headerShown: false }} />
         
         <Stack.Screen name="Notification" component={NotificationScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }}/>

@@ -19,49 +19,17 @@ import { firebaseAuth } from "../../firebaseconfig";
 import auth, { firebase } from "@react-native-firebase/auth";
 import SearchBar from "../auth/components/SearchBar";
 import mockData from "../../data/mockData";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, CommonActions } from "@react-navigation/native";
 import { NewNotificationSection } from "../jobs/NotificationsScreen";
 import {
   useNotificationsWeb,
   markNotificationAsReadWeb,
 } from "../../utils/notificationsWeb";
+import ProfileItem from "../auth/components/ProfileItem";
+import logout from "../../utils/signOut";
 
 const { width, height } = Dimensions.get("window");
-const ProfilePopupItem = ({ iconSource, buttonText, buttonOnPress }) => {
-  return (
 
-    <TouchableOpacity onPress={buttonOnPress}>
-    <View
-      style={{
-        flexDirection: "row",
-        gap: 8,
-        justifyContent: "center",
-        alignContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Image
-        source={iconSource}
-        style={{
-          tintColor: Resources.colors.black,
-          width: 18,
-          height: 18,
-          padding: 8,
-        }}
-      />
-      <Text
-        style={{
-          fontSize: 13,
-          color: Resources.colors.black,
-        }}
-      >
-        {buttonText}
-      </Text>
-    </View>
-    </TouchableOpacity>
-
-  );
-};
 function WebComponent({
   user: user,
   onClickSignIn,
@@ -301,28 +269,29 @@ function WebComponent({
             },
           ]}
         >
-          <ProfilePopupItem
+          <ProfileItem
             iconSource={Resources.icons.ic_diamond_premium}
             buttonText={"Premium Account"}
             buttonOnPress={() => {
               onClickProfileSelection()
+              onClickPremiumAccount()
             }}
           />
-          <ProfilePopupItem
+          <ProfileItem
             iconSource={Resources.icons.ic_setting}
             buttonText={"Setting"}
             buttonOnPress={() => {
               onClickProfileSelection()
-
+              onClickSettings()
             }}
 
           />
-          <ProfilePopupItem
+          <ProfileItem
             iconSource={Resources.icons.ic_logout}
             buttonText={"Logout"}
             buttonOnPress={() => {
               onClickProfileSelection()
-
+              onClickLogout()
             }}
 
           />
@@ -554,6 +523,21 @@ export default function HomeScreen() {
     },
     [route.name, navigation]
   );
+    const handleSignOutSuccess = () => {
+          navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  { name: 'Login' }, // The screen you want to navigate to
+                ],
+              })
+            )
+      
+    };
+    
+    const handleSignOutFailure = (error) => {
+      console.error("Error:"+ `Failed to log out: ${error.message}`);
+    };
 
   if (Platform.OS === "web") {
     return (
@@ -562,6 +546,15 @@ export default function HomeScreen() {
         onClickSignIn={onClickSignIn}
         onClickSignUp={onClickSignUp}
         onClickNewNotif={onClickNewNotif}
+        onClickPremiumAccount={() => {
+          navigateToScreen("PremiumAccount");
+        }}
+        onClickSettings={() => {
+          navigateToScreen("Settings");
+        }}
+        onClickLogout={() => {
+          logout(handleSignOutSuccess, handleSignOutFailure)
+        }}
       />
     );
   }

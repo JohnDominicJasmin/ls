@@ -10,7 +10,8 @@ const Resources = {
         boulder: '#7A7A7A',
         silver: '#CDCBCB',
         mercury: '#E2E2E2',
-        gray_1: '#7e7e7e'
+        gray_1: '#7e7e7e',
+        emperor: '#555555'
         
 
     },
@@ -31,13 +32,16 @@ const Resources = {
         ic_diamond_premium: require('../assets/icons/ic_diamond_premium.png'),
         ic_logout: require('../assets/icons/ic_logout.png'),
         ic_setting: require('../assets/icons/ic_setting.png'),
+        ic_location: require('../assets/icons/ic_location.png'),
+        ic_key: require('../assets/icons/ic_key.png'),
     },
     images: {
         ic_banner: require('../assets/images/ic_banner.png'),
         ic_check_email: require('../assets/images/ic_check_email.png'),
         ic_home_page_banner: require('../assets/images/home_page_poster.png'),
         ic_home_page_banner_web: require('../assets/images/ic_home_page_banner_web.png'),
-        ic_forgot_password: require('../assets/images/ic_forgot_password.png')
+        ic_forgot_password: require('../assets/images/ic_forgot_password.png'),
+        ic_premium: require('../assets/images/ic_premium.png'),
         
    
     },

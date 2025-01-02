@@ -6,7 +6,6 @@ import HomeScreen from '../screens/jobs/HomeScreen';
 import BookingsScreen from '../screens/jobs/BookingsScreen';
 import ProfileScreen from '../screens/jobs/ProfileScreen';
 import Resources from '../src/Resources';
-
 // Sample Screens
 
 

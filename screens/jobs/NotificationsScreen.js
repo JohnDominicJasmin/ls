@@ -37,7 +37,7 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
     </Text>
 
     <CreateAnAccountSection
-      style={{ marginTop: 28 }}
+      style={{ marginTop: 55 }}
       onClickLogin={onClickLogin}
       onClickCreateAccount={onClickCreateAccount}
     />
@@ -209,8 +209,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-start",
     backgroundColor: Resources.colors.white,
   },
   loaderContainer: {
@@ -220,7 +219,12 @@ const styles = StyleSheet.create({
   },
   guestContainer: {
     alignItems: "center",
+    alignSelf: 'center',
+    justifyContent: 'center',
+    alignContent: 'center',
+    verticalAlign:'middle',
     marginTop: 5,
+    flex: 1,
     flexDirection: "column",
     gap: 10,
   },
