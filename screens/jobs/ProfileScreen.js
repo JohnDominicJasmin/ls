@@ -218,7 +218,12 @@ function ProfileScreen() {
             })
           )
     }
-    Alert.alert("Success", "Logged out successfully",  [{ text: "OK", onPress: {onDialogDismiss} }]);
+    Alert.alert(
+        "Success",
+        "Logged out successfully",
+        [{ text: "OK", onPress: onDialogDismiss }]
+      );
+      
     
   };
   

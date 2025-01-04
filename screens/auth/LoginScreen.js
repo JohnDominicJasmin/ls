@@ -364,14 +364,11 @@ function LoginScreen() {
       let userCredential;
   
       if (Platform.OS === "web") {
-        // Sign in using Firebase Web SDK
         userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
       } else {
-        // Sign in using React Native Firebase SDK
         userCredential = await auth().signInWithEmailAndPassword(email, password);
       }
   
-      // Check if the email is verified
       if (userCredential.user.emailVerified) {
         console.log("Sign in successful and email is verified");
         return userCredential; // Return the userCredential for further use

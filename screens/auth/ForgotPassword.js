@@ -2,40 +2,62 @@ import { Text, View, Image, StyleSheet, Alert, Platform, Modal, Button } from "r
 import BackIcon from "../../ui/BackIcon";
 import Resources from "../../src/Resources";
 import { TextInput } from "react-native-paper";
+import Spinner from "react-native-loading-spinner-overlay"; 
 
 import sendResetPassword from "../../utils/sendPasswordResetEmail";
 import React, { useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
 
 function ForgotPassword() {
   const [email, setEmail] = useState('')
-
+  const navigation = useNavigation()
   const [dialogMessage, setDialogMessage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
   
-  const showAlert = ({message}) => {
+  const showAlert = ({message,onDialogDismiss}) => {
     if (Platform.OS === "web") {
       setDialogMessage(message)
     } else {
-      Alert.alert("Success", message);
+      Alert.alert(
+        "Success",
+        message,
+        [{ text: "OK", onPress: onDialogDismiss }]
+      );
     }
   };
 
   const resetPassword = React.useCallback(async () => {
+    const onDialogDismiss = () => {
+      navigation.navigate('Login')
+    }
+    setIsLoading(true);
+    
     sendResetPassword({
       email: email,
       onSuccess: (message) => {
+    setIsLoading(false);
+
         console.log(message); // Output: "Password reset email sent successfully"
-        showAlert('Password reset email sent successfully')
+        showAlert({message:'Password reset email sent successfully', onDialogDismiss: () => {onDialogDismiss()}})
       },
       onFailure: (error) => {
+    setIsLoading(false);
+
         console.log(error); // Output: Error message
-        showAlert(error.message)
+        showAlert({message:error.message})
 
       },
     });
     
   }, [email]);
   return (
+    <>
+    <Spinner
+          visible={isLoading}
+          textContent={"Loading..."}
+          textStyle={styles.spinnerTextStyle}
+        />
     <View
       style={{
         flex: 1,
@@ -174,6 +196,7 @@ function ForgotPassword() {
 
       
     </View>
+    </>
   );
 }
 const styles = StyleSheet.create({
@@ -202,6 +225,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
 
     fontWeight: 'semibold',
-  }
+  },
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
 }); 
 export default ForgotPassword;

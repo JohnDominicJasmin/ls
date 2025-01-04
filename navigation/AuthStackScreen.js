@@ -14,6 +14,8 @@ import { MainTabNavigator } from './MainTabNavigator';
 import HomeScreen from '../screens/jobs/HomeScreen';
 import PremiumAccountScreen from '../screens/jobs/PremiumAccountScreen';
 import SettingScreen from '../screens/jobs/SettingScreen';
+import {UserProfile} from '../screens/jobs/UserProfile';
+import ChangePassword from '../screens/auth/ChangePassword';
 
 const Stack = createStackNavigator();
 
@@ -87,8 +89,9 @@ const AuthenticationStackScreen = () => {
               <Stack.Screen name="Settings" component={SettingScreen}  options={{ headerShown: false }} />
         
         <Stack.Screen name="Notification" component={NotificationScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false }}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }}/>
-     
+        <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </>
   );

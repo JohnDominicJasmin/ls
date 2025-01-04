@@ -279,7 +279,7 @@ function WebComponent({
           />
           <ProfileItem
             iconSource={Resources.icons.ic_setting}
-            buttonText={"Setting"}
+            buttonText={"Settings"}
             buttonOnPress={() => {
               onClickProfileSelection()
               onClickSettings()

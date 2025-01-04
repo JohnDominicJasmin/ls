@@ -16,10 +16,7 @@ import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
 import CreateAnAccountSection from "../auth/components/CreateAnAccountSection";
-import {
-  markNotificationAsRead,
-  useNotifications,
-} from "../../utils/notificationsMobile";
+import { markNotificationAsRead, useNotifications } from "../../utils/userDbMobile";
 import TopAppBar from "../auth/components/TopAppBar";
 import {
   NewNotificationCard,
@@ -44,14 +41,16 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
   </View>
 );
 
-function NotificationSection({ userId, onClickNewNotif}){
+function NotificationSection({ userId, onClickNewNotif }) {
   const { notifications, error } = useNotifications(userId);
   return (
-    <NewNotificationSection notifications={notifications} onClickNewNotif={onClickNewNotif}/>
-  )
+    <NewNotificationSection
+      notifications={notifications}
+      onClickNewNotif={onClickNewNotif}
+    />
+  );
 }
-function NewNotificationSection({notifications, onClickNewNotif }) {
-
+function NewNotificationSection({ notifications, onClickNewNotif }) {
   // Check if notifications exist and handle the case where they might be empty or null
   const newNotifications = useMemo(() => {
     return notifications?.filter((notification) => !notification.isRead) || [];
@@ -78,14 +77,14 @@ function NewNotificationSection({notifications, onClickNewNotif }) {
       }}
     />
   );
-  const renderOldNotificationCard = ({item}) => (
+  const renderOldNotificationCard = ({ item }) => (
     <RecentNotificationCard
-    name={item.displayName}
-    date={item.date}
-    time={item.time}
-    description={item.description}
-  />
-  )
+      name={item.displayName}
+      date={item.date}
+      time={item.time}
+      description={item.description}
+    />
+  );
   return (
     <View
       style={{
@@ -97,10 +96,11 @@ function NewNotificationSection({notifications, onClickNewNotif }) {
       }}
     >
       {newNotifications.length > 0 && (
+
+        <>
         <Text style={styles.listTitle}>{"New Notifications"}</Text>
-      )}
-  
-      <FlatList
+        
+        <FlatList
         style={{
           flex: 1, // Takes up half of the screen's height
           height: "50%", // Explicitly set height to 50% of the screen
@@ -111,12 +111,16 @@ function NewNotificationSection({notifications, onClickNewNotif }) {
         keyExtractor={(item) => item.id.toString()}
         initialNumToRender={3}
       />
-  
-      {oldNotifications.length > 0 && (
-        <Text style={styles.listTitle}>{"Recent Notifications"}</Text>
+        </>
       )}
-  
-      <FlatList
+
+      
+
+      {oldNotifications.length > 0 && (
+
+        <>
+        <Text style={styles.listTitle}>{"Recent Notifications"}</Text>
+        <FlatList
         style={{
           flex: 1, // Takes up half of the screen's height
           height: "50%", // Explicitly set height to 50% of the screen
@@ -127,9 +131,13 @@ function NewNotificationSection({notifications, onClickNewNotif }) {
         keyExtractor={(item) => item.id.toString()}
         initialNumToRender={3}
       />
+        
+        </>
+      )}
+
+      
     </View>
   );
-  
 }
 function NotificationScreen() {
   const [user, setUser] = useState(null);
@@ -219,10 +227,10 @@ const styles = StyleSheet.create({
   },
   guestContainer: {
     alignItems: "center",
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignContent: 'center',
-    verticalAlign:'middle',
+    alignSelf: "center",
+    justifyContent: "center",
+    alignContent: "center",
+    verticalAlign: "middle",
     marginTop: 5,
     flex: 1,
     flexDirection: "column",

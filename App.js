@@ -35,10 +35,10 @@ const App = () => {
     
   };
 
-  // React.useEffect(() => {
-  //   handleAddNotification();
+  React.useEffect(() => {
+    // handleAddNotification();
 
-  // }, []);
+  }, []);
 
   return (
 

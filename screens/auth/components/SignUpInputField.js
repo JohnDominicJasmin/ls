@@ -5,10 +5,10 @@ function SignUpInputField({ style, value, setValue, placeholder, keyboardType,re
     return (
         <View
         
-         style={[style, {
+         style={[ {
             width: "100%",
             alignSelf: "center",
-         }]}>
+         }, style]}>
 
             <Text style={{
                 fontSize: 14
