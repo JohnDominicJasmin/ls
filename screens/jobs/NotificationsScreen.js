@@ -16,7 +16,8 @@ import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
 import CreateAnAccountSection from "../auth/components/CreateAnAccountSection";
-import { markNotificationAsRead, useNotifications } from "../../utils/userDbMobile";
+
+import { markNotificationAsRead, useNotification } from "../../utils/userDb";
 import TopAppBar from "../auth/components/TopAppBar";
 import {
   NewNotificationCard,
@@ -42,7 +43,7 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
 );
 
 function NotificationSection({ userId, onClickNewNotif }) {
-  const { notifications, error } = useNotifications(userId);
+  const { notifications, error } = useNotification(userId);
   return (
     <NewNotificationSection
       notifications={notifications}
@@ -96,46 +97,39 @@ function NewNotificationSection({ notifications, onClickNewNotif }) {
       }}
     >
       {newNotifications.length > 0 && (
-
         <>
-        <Text style={styles.listTitle}>{"New Notifications"}</Text>
-        
-        <FlatList
-        style={{
-          flex: 1, // Takes up half of the screen's height
-          height: "50%", // Explicitly set height to 50% of the screen
-        }}
-        showsHorizontalScrollIndicator={false}
-        data={newNotifications}
-        renderItem={renderNewNotificationCard}
-        keyExtractor={(item) => item.id.toString()}
-        initialNumToRender={3}
-      />
+          <Text style={styles.listTitle}>{"New Notifications"}</Text>
+
+          <FlatList
+            style={{
+              flex: 1, // Takes up half of the screen's height
+              height: "50%", // Explicitly set height to 50% of the screen
+            }}
+            showsHorizontalScrollIndicator={false}
+            data={newNotifications}
+            renderItem={renderNewNotificationCard}
+            keyExtractor={(item) => item.id.toString()}
+            initialNumToRender={3}
+          />
         </>
       )}
-
-      
 
       {oldNotifications.length > 0 && (
-
         <>
-        <Text style={styles.listTitle}>{"Recent Notifications"}</Text>
-        <FlatList
-        style={{
-          flex: 1, // Takes up half of the screen's height
-          height: "50%", // Explicitly set height to 50% of the screen
-        }}
-        showsHorizontalScrollIndicator={false}
-        data={oldNotifications}
-        renderItem={renderOldNotificationCard}
-        keyExtractor={(item) => item.id.toString()}
-        initialNumToRender={3}
-      />
-        
+          <Text style={styles.listTitle}>{"Recent Notifications"}</Text>
+          <FlatList
+            style={{
+              flex: 1, // Takes up half of the screen's height
+              height: "50%", // Explicitly set height to 50% of the screen
+            }}
+            showsHorizontalScrollIndicator={false}
+            data={oldNotifications}
+            renderItem={renderOldNotificationCard}
+            keyExtractor={(item) => item.id.toString()}
+            initialNumToRender={3}
+          />
         </>
       )}
-
-      
     </View>
   );
 }

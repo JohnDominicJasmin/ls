@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 
 function ForgotPassword() {
   const [email, setEmail] = useState('')
+  const [error, setErorMessage] = useState(null)
   const navigation = useNavigation()
   const [dialogMessage, setDialogMessage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -38,11 +39,14 @@ function ForgotPassword() {
       onSuccess: (message) => {
     setIsLoading(false);
 
+    setErorMessage(null)
         console.log(message); // Output: "Password reset email sent successfully"
         showAlert({message:'Password reset email sent successfully', onDialogDismiss: () => {onDialogDismiss()}})
       },
       onFailure: (error) => {
     setIsLoading(false);
+
+    setErorMessage(error);
 
         console.log(error); // Output: Error message
         showAlert({message:error.message})
@@ -136,6 +140,7 @@ function ForgotPassword() {
     }}
   >
     <TextInput
+    
       value={email}
       onChangeText={setEmail}
       style={[styles.input]}
@@ -150,6 +155,18 @@ function ForgotPassword() {
         },
       }}
     />
+
+    {error && (
+      <Text
+        style={{
+          color: Resources.colors.red,
+          fontSize: 12,
+          paddingHorizontal: 24 
+        }}
+      >
+        {error}
+      </Text>
+    )}
 
     <TouchableOpacity style={styles.submitBttn} onPress={resetPassword}>
       <Text style={styles.submitText}>{"Submit"}</Text>

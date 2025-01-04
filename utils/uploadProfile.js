@@ -1,16 +1,25 @@
-import { Alert } from 'react-native';
-
+import { Platform } from 'react-native';
 const uploadToCloudinary = async (imageUri, onSuccess, onFailure) => {
   try {
-    // Create FormData object
+    console.log('Image URI:', imageUri);
 
+    // Create FormData object
     const data = new FormData();
-    data.append('file', {
-      uri: imageUri,
-      name: 'photo.jpg', // Ensure the name has a valid extension
-      type: 'image/jpeg', // Adjust type based on your image format
-    });
-    data.append('upload_preset', 'labor-seek-preset'); // Replace with your preset name
+
+    // Append Base64 string as file
+
+    if(Platform.OS === 'web'){
+        data.append('file', imageUri); // Directly use the Base64 string
+    }else{
+        data.append('file', {
+            uri: imageUri,
+            name: 'photo.jpg', // Ensure the name has a valid extension
+            type: 'image/jpeg', // Adjust type based on your image format
+          });
+          data.append('upload_preset', 'labor-seek-preset'); // Replace with your preset name
+      
+    }
+    data.append('upload_preset', 'labor-seek-preset'); // Ensure this matches your Cloudinary preset
 
     // Send request to Cloudinary
     const response = await fetch(
@@ -18,9 +27,6 @@ const uploadToCloudinary = async (imageUri, onSuccess, onFailure) => {
       {
         method: 'POST',
         body: data,
-        headers: {
-          'Content-Type': 'multipart/form-data', // Ensure the content type is set
-        },
       }
     );
 
@@ -28,15 +34,13 @@ const uploadToCloudinary = async (imageUri, onSuccess, onFailure) => {
 
     if (response.ok) {
       console.log('Uploaded to Cloudinary:', result);
-      onSuccess(result.secure_url); // Trigger success callback with the secure URL
-      Alert.alert('Upload Successful!', `Image URL: ${result.secure_url}`);
+      onSuccess(result.secure_url); // Success callback
     } else {
       throw new Error(result.error?.message || 'Upload failed');
     }
   } catch (error) {
     console.error('Error uploading to Cloudinary:', error);
-    onFailure(error); // Trigger failure callback with the error
-    Alert.alert('Error Uploading to Cloudinary', error.message);
+    onFailure(error); // Failure callback
   }
 };
 

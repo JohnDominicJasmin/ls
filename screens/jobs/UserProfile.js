@@ -16,13 +16,14 @@ import Icon from "react-native-vector-icons/MaterialIcons"; // Install react-nat
 import SignUpInputField from "./../auth/components/SignUpInputField";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Resources from "../../src/Resources";
-import { getUserData, updateUserFields } from "../../utils/userDbMobile";
+// import { getUserDataMobile, updateUserFieldsMobile } from "../../utils/userDb";
+import { getUserData, updateUserField } from "../../utils/userDb";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import Spinner from "react-native-loading-spinner-overlay";
-import * as ImagePicker from 'expo-image-picker';
-import uploadToCloudinary from '../../utils/uploadProfile'
+import * as ImagePicker from "expo-image-picker";
+import uploadToCloudinary from "../../utils/uploadProfile";
 const ProfilePictureUI = ({ imageUri, onEditPicture, onRemovePhoto }) => {
   return (
     <View style={styles.profilePictureContainer}>
@@ -36,19 +37,21 @@ const ProfilePictureUI = ({ imageUri, onEditPicture, onRemovePhoto }) => {
           }}
         >
           <View style={styles.imageWrapper}>
-
             {imageUri ? (
               <Image
-              source={{ uri: imageUri }} // Replace with your image URL
-              style={styles.profileImage}
-            />
+                source={{ uri: imageUri }} // Replace with your image URL
+                style={styles.profileImage}
+              />
             ) : (
               <Image
-              source={Resources.icons.ic_person} // Replace with your image URL
-              style={[styles.profileImage, {resizeMode: 'contain', tintColor: Resources.colors.gray}]}
-            />
+                source={Resources.icons.ic_person} // Replace with your image URL
+                style={[
+                  styles.profileImage,
+                  { resizeMode: "contain", tintColor: Resources.colors.gray },
+                ]}
+              />
             )}
-            
+
             <TouchableOpacity style={styles.editIcon} onPress={onEditPicture}>
               <Icon name="edit" size={20} color="white" />
             </TouchableOpacity>
@@ -241,7 +244,7 @@ const MobileComponent = ({
   onClickUpdate,
 
   onEditPicture,
-   onRemovePhoto
+  onRemovePhoto,
 }) => {
   return (
     <KeyboardAwareScrollView
@@ -252,9 +255,12 @@ const MobileComponent = ({
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.innerContainer}>
           <TopAppBar title="Your Profile" />
-          <ProfilePictureUI imageUri={imageUri} onEditPicture={onEditPicture} onRemovePhoto={onRemovePhoto}/>
+          <ProfilePictureUI
+            imageUri={imageUri}
+            onEditPicture={onEditPicture}
+            onRemovePhoto={onRemovePhoto}
+          />
           <ProfileInputs
-          
             firstName={firstName}
             updateFirstName={setFirstName}
             firstNameError={firstNameError}
@@ -295,7 +301,6 @@ function UserProfile() {
   const [imageUri, setImageUri] = useState(null);
   const [currentUser, setUser] = useState(null);
 
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -315,7 +320,6 @@ function UserProfile() {
       setImageUri(result.assets[0].uri);
     }
   };
-  ;
   // Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
@@ -347,7 +351,7 @@ function UserProfile() {
       setBarangay(user.barangay);
       setCity(user.city);
       setProvince(user.province);
-      setImageUri(user.photoUrl)
+      setImageUri(user.photoUrl);
     }
   }, [user]);
 
@@ -357,21 +361,52 @@ function UserProfile() {
     }
   }, []);
 
-
   const onRemovePhoto = React.useCallback(() => {
-    setImageUri(null)
-  },[])
-
-
+    setImageUri(null);
+  }, []);
 
   const onClickUpdate = React.useCallback(() => {
     setIsLoading(true);
-    console.log(`IMage URI: ${imageUri}`)
-    if(imageUri != null ){
-      uploadToCloudinary(imageUri, (url) => {
-      setIsLoading(false);
+    console.log(`IMage URI: ${imageUri}`);
+    const hasHttp =
+      imageUri.startsWith("http://") || imageUri.startsWith("https://");
 
-  updateUserFields(
+    if (imageUri != null && !hasHttp) {
+      uploadToCloudinary(
+        imageUri,
+        (url) => {
+          setIsLoading(false);
+
+          updateUserField(
+            currentUser?.uid,
+            (fields = {
+              firstName: firstName,
+              lastName: lastName,
+              phoneNumber: phoneNumber,
+              address: address,
+              barangay: barangay,
+              city: city,
+              province: province,
+              photoUrl: url,
+            }),
+            () => {
+              setIsLoading(false);
+              Alert.alert("Success", "Profile updated successfully");
+            },
+            () => {
+              setIsLoading(false);
+              Alert.alert("Error", "Failed to update profile");
+            }
+          );
+        },
+        () => {
+          console.log("Image upload failed");
+          setIsLoading(false);
+        }
+      );
+      return;
+    }
+    updateUserField(
       currentUser?.uid,
       (fields = {
         firstName: firstName,
@@ -381,7 +416,7 @@ function UserProfile() {
         barangay: barangay,
         city: city,
         province: province,
-        photoUrl : url
+        photoUrl: imageUri,
       }),
       () => {
         setIsLoading(false);
@@ -392,36 +427,6 @@ function UserProfile() {
         Alert.alert("Error", "Failed to update profile");
       }
     );
-    }, () => {
-      console.log("Image upload failed");
-      setIsLoading(false);
-
-    })
-    return;
-    }
-    updateUserFields(
-      currentUser?.uid,
-      (fields = {
-        firstName: firstName,
-        lastName: lastName,
-        phoneNumber: phoneNumber,
-        address: address,
-        barangay: barangay,
-        city: city,
-        province: province,
-        photoUrl : imageUri
-      }),
-      () => {
-        setIsLoading(false);
-        Alert.alert("Success", "Profile updated successfully");
-      },
-      () => {
-        setIsLoading(false);
-        Alert.alert("Error", "Failed to update profile");
-      }
-    )
-     
-
   }, [
     currentUser,
     firstName,
@@ -431,7 +436,7 @@ function UserProfile() {
     barangay,
     city,
     province,
-    imageUri
+    imageUri,
   ]);
 
   return (
@@ -446,7 +451,7 @@ function UserProfile() {
         <WebComponent />
       ) : (
         <MobileComponent
-        imageUri={imageUri}
+          imageUri={imageUri}
           firstName={firstName}
           setFirstName={setFirstName}
           lastName={lastName}
@@ -501,7 +506,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    resizeMode: 'cover',
+    resizeMode: "cover",
     borderWidth: 2,
     borderColor: "#ccc",
   },
@@ -526,6 +531,9 @@ const styles = StyleSheet.create({
     color: "#3f51b5",
     fontWeight: "bold",
   },
+  spinnerTextStyle: {
+    color: "#FFF",
+  },
 });
 
-export {UserProfile, ProfilePictureUI};
+export { UserProfile, ProfilePictureUI };

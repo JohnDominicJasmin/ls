@@ -19,12 +19,14 @@ import { firebaseAuth } from "../../firebaseconfig";
 import auth, { firebase } from "@react-native-firebase/auth";
 import SearchBar from "../auth/components/SearchBar";
 import mockData from "../../data/mockData";
-import { useNavigation, useRoute, CommonActions } from "@react-navigation/native";
-import { NewNotificationSection } from "../jobs/NotificationsScreen";
 import {
-  useNotificationsWeb,
-  markNotificationAsReadWeb,
-} from "../../utils/notificationsWeb";
+  useNavigation,
+  useRoute,
+  CommonActions,
+} from "@react-navigation/native";
+import { NewNotificationSection } from "../jobs/NotificationsScreen";
+
+import { useNotification, markNotificationAsRead } from "../../utils/userDb";
 import ProfileItem from "../auth/components/ProfileItem";
 import logout from "../../utils/signOut";
 
@@ -41,7 +43,7 @@ function WebComponent({
 }) {
   const data = mockData();
   const [shouldShowNotification, setShouldShowNotification] = useState(false);
-  const { notifications, error } = useNotificationsWeb(user?.uid);
+  const { notifications, error } = useNotification(user?.uid);
   const [shouldShowProfileSelections, setShouldShowProfileSelections] =
     useState(false);
   const onClickNotification = React.useCallback(() => {
@@ -220,7 +222,7 @@ function WebComponent({
             styles.popUp,
           ]}
         >
-          {notifications.length === 0 ? (
+          {notifications?.length === 0 ? (
             <NoNotificationsYet />
           ) : (
             <NewNotificationSection
@@ -273,27 +275,25 @@ function WebComponent({
             iconSource={Resources.icons.ic_diamond_premium}
             buttonText={"Premium Account"}
             buttonOnPress={() => {
-              onClickProfileSelection()
-              onClickPremiumAccount()
+              onClickProfileSelection();
+              onClickPremiumAccount();
             }}
           />
           <ProfileItem
             iconSource={Resources.icons.ic_setting}
             buttonText={"Settings"}
             buttonOnPress={() => {
-              onClickProfileSelection()
-              onClickSettings()
+              onClickProfileSelection();
+              onClickSettings();
             }}
-
           />
           <ProfileItem
             iconSource={Resources.icons.ic_logout}
             buttonText={"Logout"}
             buttonOnPress={() => {
-              onClickProfileSelection()
-              onClickLogout()
+              onClickProfileSelection();
+              onClickLogout();
             }}
-
           />
         </View>
       )}
@@ -303,6 +303,7 @@ function WebComponent({
 
 function MobileComponent({ user, navigateNotification }) {
   const route = useRoute();
+  
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -413,15 +414,15 @@ const NotificationButton = ({ onPress }) => {
   );
 };
 
-const ProfileImage = ({ user, onPress }) => {
+const ProfileImage = ({ photoUrl, onPress }) => {
   return (
     <View>
       <TouchableOpacity onPress={onPress}>
         <Image
           style={styles.roundImage}
           source={
-            user?.photoURL
-              ? { uri: user?.photoURL }
+            photoUrl
+              ? { uri: photoUrl }
               : Resources.icons.ic_placeholder
           }
         />
@@ -504,7 +505,7 @@ export default function HomeScreen() {
           return;
         }
 
-        await markNotificationAsReadWeb(user.uid, id);
+        await markNotificationAsRead(user.uid, id);
         console.log(`Notification ${id} marked as read for user ${user.uid}`);
       } catch (error) {
         console.error("Error while marking notification as read:", error);
@@ -523,21 +524,20 @@ export default function HomeScreen() {
     },
     [route.name, navigation]
   );
-    const handleSignOutSuccess = () => {
-          navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [
-                  { name: 'Login' }, // The screen you want to navigate to
-                ],
-              })
-            )
-      
-    };
-    
-    const handleSignOutFailure = (error) => {
-      console.error("Error:"+ `Failed to log out: ${error.message}`);
-    };
+  const handleSignOutSuccess = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          { name: "Login" }, // The screen you want to navigate to
+        ],
+      })
+    );
+  };
+
+  const handleSignOutFailure = (error) => {
+    console.error("Error:" + `Failed to log out: ${error.message}`);
+  };
 
   if (Platform.OS === "web") {
     return (
@@ -553,7 +553,7 @@ export default function HomeScreen() {
           navigateToScreen("Settings");
         }}
         onClickLogout={() => {
-          logout(handleSignOutSuccess, handleSignOutFailure)
+          logout(handleSignOutSuccess, handleSignOutFailure);
         }}
       />
     );
@@ -620,7 +620,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     marginTop: 16,
-    height: 360,
+    height: 400,
     resizeMode: "center",
   },
   welcomeText: {
