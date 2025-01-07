@@ -11,11 +11,14 @@ import EmailVerification from '../screens/auth/EmailVerification';
 import {NotificationScreen} from '../screens/jobs/NotificationsScreen'
 import ForgotPassword from '../screens/auth/ForgotPassword';
 import { MainTabNavigator } from './MainTabNavigator';
-import HomeScreen from '../screens/jobs/HomeScreen';
+import {HomeScreen} from '../screens/jobs/HomeScreen';
 import PremiumAccountScreen from '../screens/jobs/PremiumAccountScreen';
 import SettingScreen from '../screens/jobs/SettingScreen';
 import {UserProfile} from '../screens/jobs/UserProfile';
 import ChangePassword from '../screens/auth/ChangePassword';
+import ServiceScreen from '../screens/jobs/Service';
+import {BookServiceScreen} from '../screens/jobs/BookServiceScreen';
+import BookingsScreen from '../screens/jobs/BookingsScreen';
 
 const Stack = createStackNavigator();
 
@@ -83,11 +86,14 @@ const AuthenticationStackScreen = () => {
           <Stack.Screen name="Main" component={MainTabNavigator} options={{ headerShown: false }} />
         ) : ( <Stack.Screen name="Main" component={HomeScreen} options={{ headerShown: false }} />)}
         
+        <Stack.Screen name="BookService" component={BookServiceScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Bookings" component={BookingsScreen}options={{ headerShown: false }} />
 
 
-              <Stack.Screen name="PremiumAccount" component={PremiumAccountScreen}  options={{ headerShown: false }} />
-              <Stack.Screen name="Settings" component={SettingScreen}  options={{ headerShown: false }} />
-        
+        <Stack.Screen name="PremiumAccount" component={PremiumAccountScreen}  options={{ headerShown: false }} />
+        <Stack.Screen name="Settings" component={SettingScreen}  options={{ headerShown: false }} />
+
+       <Stack.Screen name="ServicesScreen" component={ServiceScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Notification" component={NotificationScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false }}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }}/>

@@ -147,7 +147,6 @@ function NotificationScreen() {
           : auth().currentUser; // Mobile
 
       setUser(currentUser); // Set the user state
-      console.log("Current user id is:", currentUser.uid);
       setLoading(false);
     };
 

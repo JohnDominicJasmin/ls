@@ -16,6 +16,7 @@ const Resources = {
 
     },
     icons: {
+        ic_telephone: require('../assets/icons/ic_telephone.png'),
         ic_eye_close: require('../assets/icons/ic_eyes_close.png') ,
         ic_eye_open: require('../assets/icons/ic_eyes_open.png') ,
         ic_back_arrow: require('../assets/icons/ic_arrow_back.png'),
@@ -34,6 +35,7 @@ const Resources = {
         ic_setting: require('../assets/icons/ic_setting.png'),
         ic_location: require('../assets/icons/ic_location.png'),
         ic_key: require('../assets/icons/ic_key.png'),
+        ic_star: require('../assets/icons/ic_star.png')
     },
     images: {
         ic_banner: require('../assets/images/ic_banner.png'),

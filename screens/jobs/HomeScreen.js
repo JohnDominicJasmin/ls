@@ -29,8 +29,10 @@ import { NewNotificationSection } from "../jobs/NotificationsScreen";
 import { useNotification, markNotificationAsRead } from "../../utils/userDb";
 import ProfileItem from "../auth/components/ProfileItem";
 import logout from "../../utils/signOut";
-
+import { getUserData } from "../../utils/userDb";
+import NavigationBar from "../../ui/NavigationBar";
 const { width, height } = Dimensions.get("window");
+import { getCategories } from "../../utils/userDb";
 
 function WebComponent({
   user: user,
@@ -40,6 +42,12 @@ function WebComponent({
   onClickPremiumAccount,
   onClickSettings,
   onClickLogout,
+  userPhoto,
+  displayName,
+  onClickCategory,
+  onClickBookings,
+  categories
+  
 }) {
   const data = mockData();
   const [shouldShowNotification, setShouldShowNotification] = useState(false);
@@ -55,13 +63,17 @@ function WebComponent({
 
   const renderItem = ({ item, index }) => {
     return (
-      <View style={[styles.gridItem, { marginHorizontal: 16 }]}>
-        <View style={styles.gridCircle}>
-          <Image style={styles.gridIcon} source={item.icon} />
+      <TouchableOpacity onPress={() => {
+        onClick(item, index)
+        console.log(item)
+      }}>
+        <View style={styles.gridItem}>
+          <View style={styles.gridCircle}>
+            <Image style={styles.gridIcon} source={{uri: item.icon}} />
+          </View>
+          <Text style={styles.itemText}>{item.name}</Text>
         </View>
-
-        <Text style={styles.itemText}>{item.serviceName}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
   return (
@@ -75,76 +87,7 @@ function WebComponent({
         paddingVertical: 16,
       }}
     >
-      <View
-        style={{
-          width: "100%",
-          paddingVertical: 8,
-          height: "auto",
-          flexDirection: "row",
-          justifyContent: "end",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            marginLeft: 32,
-          }}
-        >
-          <Image
-            source={Resources.icons.app_logo}
-            style={{ height: 64, width: 64 }}
-          />
-        </View>
-        <SearchBar styleContainer={{ marginTop: 16, width: 400 }} />
-
-        {user && !user.isAnonymous && (
-          <ProfileImage user={user} onPress={onClickProfileSelection} />
-        )}
-
-        {user && !user.isAnonymous && (
-          <NotificationButton onPress={onClickNotification} />
-        )}
-
-        {user && user.isAnonymous && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 16,
-              paddingHorizontal: 16,
-            }}
-          >
-            <TouchableOpacity onPress={onClickSignIn}>
-              <Text
-                style={{
-                  color: Resources.colors.royalBlue,
-                }}
-              >
-                {"Log In"}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                padding: 12,
-                borderRadius: 8,
-                backgroundColor: Resources.colors.royalBlue_1,
-              }}
-              onPress={onClickSignUp}
-            >
-              <Text
-                style={{
-                  color: Resources.colors.royalBlue,
-                }}
-              >
-                {"Sign Up"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+      <NavigationBar user={user} userPhoto={userPhoto} onClickProfileSelection={onClickProfileSelection} onClickNotification={onClickNotification} onClickSignIn={onClickSignIn} onClickSignUp={onClickSignUp} onClickBookings={onClickBookings}/>
 
       <View
         style={{
@@ -160,13 +103,13 @@ function WebComponent({
             gap: 8,
           }}
         >
-          {user?.displayName && user ? (
-            <Text style={styles.helloTextWeb}>
-              {"Hello, " + user?.displayName}
-            </Text>
-          ) : (
-            <Text style={styles.helloTextWeb}>{"Hello, Guest User"}</Text>
-          )}
+          {user && !user?.isAnonymous ? (
+                    <Text style={[styles.helloText, ]} numberOfLines={2} ellipsizeMode="tail">
+                      {"Hello, " + displayName}
+                    </Text>
+                  ) : (
+                    <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
+                  )}
           <Text
             style={{
               color: Resources.colors.gray_1,
@@ -186,10 +129,10 @@ function WebComponent({
           }}
         >
           <FlatList
-            data={data.home_page.services}
+            data={categories}
             horizontal={true}
             renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(item, index) => item.id}
             contentContainerStyle={styles.grid}
           />
         </View>
@@ -301,8 +244,7 @@ function WebComponent({
   );
 }
 
-function MobileComponent({ user, navigateNotification }) {
-  const route = useRoute();
+function MobileComponent({ user, displayName, userPhoto, navigateNotification, onClickCategory, categories }) {
   
   return (
     <KeyboardAvoidingView
@@ -327,11 +269,11 @@ function MobileComponent({ user, navigateNotification }) {
                     flex: 1,
                   }}
                 >
-                  {user && !user.isAnonymous && <ProfileImage user={user} />}
+                  {user && !user?.isAnonymous && <ProfileImage user={user} photoUrl={userPhoto} />}
 
-                  {user?.displayName && user ? (
-                    <Text style={styles.helloText}>
-                      {"Hello, " + user?.displayName}
+                  {user && !user?.isAnonymous ? (
+                    <Text style={[styles.helloText, ]} numberOfLines={2} ellipsizeMode="tail">
+                      {"Hello, " + displayName}
                     </Text>
                   ) : (
                     <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
@@ -354,7 +296,7 @@ function MobileComponent({ user, navigateNotification }) {
               </Text>
 
               <SearchBar styleContainer={{ marginTop: 16 }} />
-              <GridCategories />
+              <GridCategories onClick={onClickCategory} categories={categories}/>
               <PosterImage />
             </View>
           </ScrollView>
@@ -439,42 +381,53 @@ const PosterImage = () => {
   );
 };
 
-const GridCategories = () => {
-  const data = mockData();
+const GridCategories = ({ categories, onClick }) => {
 
   const renderItem = ({ item, index }) => {
     return (
-      <View style={styles.gridItem}>
-        <View style={styles.gridCircle}>
-          <Image style={styles.gridIcon} source={item.icon} />
+      <TouchableOpacity onPress={() => {
+        onClick(item, index)
+      }}>
+        <View style={styles.gridItem}>
+          <View style={styles.gridCircle}>
+            <Image style={styles.gridIcon} source={{uri: item.icon}} />
+          </View>
+          <Text style={styles.itemText}>{item.name}</Text>
         </View>
-
-        <Text style={styles.itemText}>{item.serviceName}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
     <FlatList
-      data={data.home_page.services}
+      data={categories}
       renderItem={renderItem}
-      keyExtractor={(item, index) => index.toString()}
+      keyExtractor={(item) => item.id } // Use a unique key if available
       numColumns={4} // Number of columns in the grid
       contentContainerStyle={styles.grid}
     />
   );
 };
 
-export default function HomeScreen() {
+
+ function HomeScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const [user, setUser] = useState(null);
+  const [currentUser, setUser] = useState(null);
+  const [displayName, setDisplayName] = useState(null)
+  const [userPhoto, setUserPhoto] = useState(null)
+  const [categories, setCategories] = useState(null)
   const onClickSignIn = React.useCallback(() => {
     navigation.navigate("Login");
   }, []);
   const onClickSignUp = React.useCallback(() => {
     navigation.navigate("SignUp");
   });
+  const onClickBookings = React.useCallback(() => {
+    navigation.navigate("Bookings");
+  }, []);
+
+  const [loading, setLoading] = useState(true); 
   useEffect(() => {
     const fetchUser = async () => {
       let currentUser;
@@ -491,27 +444,41 @@ export default function HomeScreen() {
     fetchUser();
   }, []);
 
-  React.useEffect(() => {
-    console.log(
-      `User is ${JSON.stringify(user?.photoURL)} ${user?.displayName} `
-    );
-  }, [user]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await getCategories();  // Call the function
+        setCategories(data);  // Set the categories data to state
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false);  // Stop loading once data is fetched
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const { user, error } = getUserData(currentUser?.uid);
+
+
+
   const onClickNewNotif = React.useCallback(
     async (id) => {
       console.log(`Notification ${id} clicked`);
       try {
-        if (!user?.uid) {
+        if (!currentUser?.uid) {
           console.log("User ID is not available");
           return;
         }
 
-        await markNotificationAsRead(user.uid, id);
-        console.log(`Notification ${id} marked as read for user ${user.uid}`);
+        await markNotificationAsRead(currentUser.uid, id);
+        console.log(`Notification ${id} marked as read for user ${currentUser.uid}`);
       } catch (error) {
         console.error("Error while marking notification as read:", error);
       }
     },
-    [user?.uid]
+    [currentUser?.uid]
   );
   const navigateToScreen = React.useCallback(
     (screenRoute) => {
@@ -539,13 +506,27 @@ export default function HomeScreen() {
     console.error("Error:" + `Failed to log out: ${error.message}`);
   };
 
+  const onClickCategory = React.useCallback((item, index) => {
+    navigation.navigate("ServicesScreen", {name: item.name, image: item.image})
+  }, [])
+
+  useEffect(() => {
+    console.log(`User data is ${user}`)
+    if (user) {
+      setDisplayName(user.firstName + " " + user.lastName)
+      setUserPhoto(user.photoUrl)
+    }
+  }, [user]);
   if (Platform.OS === "web") {
     return (
       <WebComponent
-        user={user}
+        user={currentUser}
+        categories={categories}
+        onClickBookings={onClickBookings}
         onClickSignIn={onClickSignIn}
         onClickSignUp={onClickSignUp}
         onClickNewNotif={onClickNewNotif}
+        onClickCategory={onClickCategory}
         onClickPremiumAccount={() => {
           navigateToScreen("PremiumAccount");
         }}
@@ -555,13 +536,19 @@ export default function HomeScreen() {
         onClickLogout={() => {
           logout(handleSignOutSuccess, handleSignOutFailure);
         }}
+        displayName={displayName}
+        userPhoto={userPhoto}
       />
     );
   }
 
   return (
-    <MobileComponent
-      user={user}
+    < MobileComponent
+    categories={categories}
+      user={currentUser}
+      displayName={displayName}
+      userPhoto={userPhoto}
+      onClickCategory={onClickCategory}
       navigateNotification={() => {
         navigateToScreen("Notification");
       }}
@@ -579,6 +566,8 @@ const styles = StyleSheet.create({
   helloText: {
     fontSize: 24,
     color: Resources.colors.black,
+    marginRight: 40,
+    
   },
   helloTextWeb: {
     fontSize: 48,
@@ -668,3 +657,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+export {HomeScreen, ProfileImage, NotificationButton}

@@ -13,11 +13,11 @@ import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
 import SignUpInputField from "./components/SignUpInputField";
 import React from "react";
-import { createUserWithEmailAndPassword, updateProfile,  } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
-
+import { createUserData } from "../../utils/userDb";
 function SignUpScreen() {
   const [firstName, setFirstName] = React.useState(null);
   const [firstNameError, setFirstNameError] = React.useState(null);
@@ -107,9 +107,9 @@ function SignUpScreen() {
     },
     [confirmPassword, confirmPasswordError]
   );
-  const navigateToEmailVerification = React.useCallback(() => { 
-    navigation.navigate("EmailVerification", {email: email});
-  },[email]);
+  const navigateToEmailVerification = React.useCallback(() => {
+    navigation.navigate("EmailVerification", { email: email });
+  }, [email]);
   const handleSignUp = React.useCallback(async () => {
     setIsLoading(true);
 
@@ -121,30 +121,52 @@ function SignUpScreen() {
       return;
     }
     try {
-        
-     
-        let userCredential;
-        if(Platform.OS === 'web'){
-          userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-        }else{
-          userCredential = await auth().createUserWithEmailAndPassword(email, password);
-        }
+      let userCredential;
+      if (Platform.OS === "web") {
+        userCredential = await createUserWithEmailAndPassword(
+          firebaseAuth,
+          email,
+          password
+        );
+      } else {
+        userCredential = await auth().createUserWithEmailAndPassword(
+          email,
+          password
+        );
+      }
 
-        const updateUser = async (user) => {
-            if(Platform.OS === 'web'){
-              return await updateProfile(user, {
-                displayName: `${firstName} ${lastName}`
-              });   
-            }
-            return  await user.updateProfile({
-                displayName: `${firstName} ${lastName}`, // Combine first and last name or use any desired format
-              });
-
+      const updateUser = async (user) => {
+        if (Platform.OS === "web") {
+          return await updateProfile(user, {
+            displayName: `${firstName} ${lastName}`,
+          });
         }
+        return await user.updateProfile({
+          displayName: `${firstName} ${lastName}`, // Combine first and last name or use any desired format
+        });
+      };
+
+      const userId = userCredential.user.uid; // Unique user ID (e.g., from authentication)
+
       const user = userCredential.user;
       if (user) {
         await updateUser(user);
         navigateToEmailVerification();
+        const userData = {
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          password: password,
+          userId: userId,
+          createdAt: new Date().toISOString(), // Timestamp
+        };
+        createUserData(userId, userData)
+          .then(() => {
+            console.log("User data successfully created!");
+          })
+          .catch((error) => {
+            console.error("Error creating user data:", error);
+          });
       }
       setIsLoading(false);
     } catch (error) {
@@ -159,10 +181,8 @@ function SignUpScreen() {
         setConfirmPasswordError("Weak password!");
       } else if (error.code === "auth/network-request-failed") {
         alert("Network error occurred! Please try again.");
-      }
-      
-      else {
-        alert("An error occurred while creating your account!"+error);
+      } else {
+        alert("An error occurred while creating your account!" + error);
       }
     }
   }, [firstName, lastName, email, password, confirmPassword]);

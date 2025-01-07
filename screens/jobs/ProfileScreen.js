@@ -7,8 +7,9 @@ import BackIcon from "../../ui/BackIcon";
 import { useNavigation,CommonActions } from "@react-navigation/native";
 import CreateAnAccountSection from "../auth/components/CreateAnAccountSection";
 import ProfileItem from "../auth/components/ProfileItem";
-import signOut from "../../utils/signOut";
 import logout from "../../utils/signOut";
+import { getUserData } from "../../utils/userDb";
+
 const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
   <View style={styles.guestContainer}>
     <View
@@ -36,7 +37,7 @@ const ProfileScreenContent = ({
   imageSource,
   name,
   address,
-  isFreeAccount,
+  isAccountPremium,
   onClickPremiumAccount,
   onClickSettings,
   onClickLogout
@@ -95,7 +96,7 @@ const ProfileScreenContent = ({
             {address}
           </Text>
         </View>
-        {isFreeAccount ? (
+        {!isAccountPremium ? (
           <>
             <Text
               style={{
@@ -166,9 +167,12 @@ const ProfileScreenContent = ({
 };
 
 function ProfileScreen() {
-  const [user, setUser] = useState(null);
+  const [currentUser, setUser] = useState(null);
   const navigation = useNavigation();
-
+ const [displayName, setDisplayName] = useState(null)
+ const [isAccountPremium, setIsAccountPremium] = useState(false)
+ const [fullAddress, setFullAddress] = useState(null);
+  const [userPhoto, setUserPhoto] = useState(null)
   const mockData = {
     photoUrl:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9FKvV2vt3otTUnhnrrCKP-hYKKsRuFLTSsZ6f5buBye7-x7hbDkqlhgQygXSYrJAZo5I",
@@ -178,13 +182,13 @@ function ProfileScreen() {
   };
   useEffect(() => {
     const fetchUser = async () => {
-      let currentUser =
+      let firebaseUser =
         Platform.OS === "web"
           ? firebaseAuth.currentUser // Web
           : auth().currentUser; // Mobile
 
-      setUser(currentUser); // Set the user state
-      console.log("Current user is:", currentUser);
+      setUser(firebaseUser); // Set the user state
+      console.log("Current user is:", firebaseUser);
     };
 
     fetchUser();
@@ -206,6 +210,19 @@ function ProfileScreen() {
     navigation.navigate("Settings")
     
   }, [])
+  
+    const { user, error } = getUserData(currentUser?.uid);
+  
+    useEffect(() => {
+      console.log(`User data is ${user}`)
+      if (user) {
+        setDisplayName(user.firstName + " " + user.lastName)
+        setUserPhoto(user.photoUrl)
+        setIsAccountPremium(user.setIsAccountPremium)
+        const fullAddress = user.address + ", " + user.barangay + ", " + user.city
+        setFullAddress(fullAddress)
+      }
+    }, [user]);
 
   const handleSuccess = () => {
     const onDialogDismiss  = () => {
@@ -241,17 +258,17 @@ function ProfileScreen() {
             position: "absolute",
           }}
         />
-        {user && user.isAnonymous ? (
+        {currentUser && currentUser.isAnonymous ? (
           <GuestAccountDisplay
             onClickCreateAccount={onClickCreateAccount}
             onClickLogin={onClickLogin}
           />
         ) : (
           <ProfileScreenContent
-            imageSource={{ uri: mockData.photoUrl }}
-            name={mockData.name}
-            address={mockData.address}
-            isFreeAccount={mockData.isFree}
+            imageSource={{ uri: userPhoto }}
+            name={displayName}
+            address={fullAddress}
+            isAccountPremium={isAccountPremium}
             onClickPremiumAccount={onClickPremiumAccount}
             onClickSettings={onClickSettings}
             onClickLogout={() => {

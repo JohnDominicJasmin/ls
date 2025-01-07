@@ -6,7 +6,7 @@ import TopAppBar from "../auth/components/TopAppBar";
 import ProfileItem from "../auth/components/ProfileItem";
 import React, { useEffect, useState } from "react";
 import { firebaseAuth } from "../../firebaseconfig";
-
+import auth from "@react-native-firebase/auth";
 import { ProfilePictureUI } from "../jobs/UserProfile";
 import SignUpInputField from "../auth/components/SignUpInputField";
 import Spinner from "react-native-loading-spinner-overlay";

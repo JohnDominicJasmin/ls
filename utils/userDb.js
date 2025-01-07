@@ -2,7 +2,7 @@ import database from "@react-native-firebase/database";
 import { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 import { Platform } from "react-native";
-import { getFirestore, collection, query, onSnapshot, addDoc, serverTimestamp,  doc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, query, onSnapshot, getDocs, serverTimestamp,  doc, updateDoc } from "firebase/firestore";
 
  
  
@@ -219,6 +219,26 @@ export function getUserData(userId) {
 
 
 
+export async function createUserData(userId, userData) {
+  try {
+    if (Platform.OS === "web") {
+      // Firestore instance for Web
+      const db = getFirestore();
+      const userRef = doc(db, "users", userId); // Path: users/{userId}
+      await setDoc(userRef, userData); // Set the document in Firestore
+    } else {
+      // Firestore instance for Mobile
+      const userRef = firestore().collection("users").doc(userId);
+      await userRef.set(userData); // Set the document in Firestore
+    }
+
+    console.log("User data created successfully!");
+  } catch (error) {
+    console.error("Error creating user data:", error);
+    throw error; // Re-throw error for further handling
+  }
+}
+
 
 
 
@@ -268,4 +288,62 @@ async  function markNotificationAsReadMobile(userId, notificationId) {
       return markNotificationAsReadWeb(userId, notificationId);
     }
     return markNotificationAsReadMobile(userId, notificationId);
+  }
+
+
+
+
+  const getCategoriesMobile = async () => {
+    try {
+      // Reference the collection
+      const collectionRef = firestore().collection('categories');
+  
+      // Fetch all documents in the collection
+      const snapshot = await collectionRef.get();
+  
+      // Process the data
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id, // Document ID
+        ...doc.data(), // Document data
+      }));
+  
+      return data;
+    } catch (error) {
+      console.error("Error fetching collection:", error);
+      return [];
+    }
+  };
+
+  const getCategoriesWeb = async () => {
+    try {
+      // Initialize Firestore
+      const db = getFirestore();
+  
+      // Reference the collection
+      const collectionRef = collection(db, 'categories');
+  
+      // Fetch all documents in the collection
+      const querySnapshot = await getDocs(collectionRef);
+  
+      // Process the data
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id, // Document ID
+        ...doc.data(), // Document data
+      }));
+  
+      return data;
+    } catch (error) {
+      console.error("Error fetching collection:", error);
+      return [];
+    }
+  };
+
+  
+
+  export async function getCategories() {
+    if (Platform.OS === 'web') {
+      return getCategoriesWeb();
+    } else {
+      return getCategoriesMobile();
+    }
   }
