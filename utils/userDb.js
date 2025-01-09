@@ -7,70 +7,70 @@ import { getFirestore, collection, query, onSnapshot, getDocs, serverTimestamp, 
  
  
 
-  export function useNotification(userId) {
-    const [notifications, setNotifications] = useState([]);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      if (!userId) return;
-  
-      let unsubscribe;
-  
-      if (Platform.OS === "web") {
-        // Firestore instance for web
-        const db = getFirestore();
-        const notificationsRef = collection(db, `users/${userId}/notifications`);
-  
-        // Real-time listener for web
-        unsubscribe = onSnapshot(
-          query(notificationsRef),
-          (querySnapshot) => {
-            const notificationsArray = querySnapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            console.log("Notifications (Web):", notificationsArray);
-            setNotifications(notificationsArray);
-          },
-          (err) => {
-            console.error("Error fetching notifications (Web):", err);
-            setError(err);
-          }
-        );
-      } else {
-        // Firestore instance for mobile
-        const notificationsRef = firestore()
-          .collection("users")
-          .doc(userId)
-          .collection("notifications");
-  
-        // Real-time listener for mobile
-        unsubscribe = notificationsRef.onSnapshot(
-          (snapshot) => {
-            const notificationsArray = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-            console.log("Notifications (Mobile):", notificationsArray);
-            setNotifications(notificationsArray);
-          },
-          (err) => {
-            console.error("Error fetching notifications (Mobile):", err);
-            setError(err);
-          }
-        );
-      }
-  
-      // Cleanup listener on unmount
-      return () => {
-        if (unsubscribe) {
-          unsubscribe();
+    export function useNotification(userId) {
+      const [notifications, setNotifications] = useState([]);
+      const [error, setError] = useState(null);
+    
+      useEffect(() => {
+        if (!userId) return;
+    
+        let unsubscribe;
+    
+        if (Platform.OS === "web") {
+          // Firestore instance for web
+          const db = getFirestore();
+          const notificationsRef = collection(db, `users/${userId}/notifications`);
+    
+          // Real-time listener for web
+          unsubscribe = onSnapshot(
+            query(notificationsRef),
+            (querySnapshot) => {
+              const notificationsArray = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              console.log("Notifications (Web):", notificationsArray);
+              setNotifications(notificationsArray);
+            },
+            (err) => {
+              console.error("Error fetching notifications (Web):", err);
+              setError(err);
+            }
+          );
+        } else {
+          // Firestore instance for mobile
+          const notificationsRef = firestore()
+            .collection("users")
+            .doc(userId)
+            .collection("notifications");
+    
+          // Real-time listener for mobile
+          unsubscribe = notificationsRef.onSnapshot(
+            (snapshot) => {
+              const notificationsArray = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              console.log("Notifications (Mobile):", notificationsArray);
+              setNotifications(notificationsArray);
+            },
+            (err) => {
+              console.error("Error fetching notifications (Mobile):", err);
+              setError(err);
+            }
+          );
         }
-      };
-    }, [userId]);
-  
-    return { notifications, error };
-}
+    
+        // Cleanup listener on unmount
+        return () => {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        };
+      }, [userId]);
+    
+      return { notifications, error };
+  }
 
  async function updateUserFieldsWeb(
   userId,
@@ -141,6 +141,16 @@ export async function updateUserField(userId, fields, onSuccess, onFailure) {
 
 
 
+const checkIfPremiumAccountExpired = (firestoreTimestamp) => {
+  const firebaseDate = new Date(firestoreTimestamp.seconds * 1000);
+
+
+  const twoMonthsAgo = new Date();
+  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+
+  return firebaseDate < twoMonthsAgo;
+};
 
 
 
@@ -160,7 +170,7 @@ export async function updateUserField(userId, fields, onSuccess, onFailure) {
       userRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          setUser({ id: snapshot.id, ...snapshot.data() });
+          setUser({ id: snapshot.id, ...snapshot.data(), isAccountPremium: !checkIfPremiumAccountExpired(snapshot.data().premiumAccountApplied) });
         } else {
           console.error("User not found.");
           setError("User not found.");
@@ -185,13 +195,14 @@ export async function updateUserField(userId, fields, onSuccess, onFailure) {
   useEffect(() => {
     if (!userId) return; // Exit early if no userId is provided
 
+    console.log(`User id ${userId}`)
     const userRef = firestore().collection("users").doc(userId);
 
     // Listen for real-time updates
     const unsubscribe = userRef.onSnapshot(
       (snapshot) => {
         if (snapshot.exists) {
-          setUser({ id: snapshot.id, ...snapshot.data() });
+          setUser({ id: snapshot.id, ...snapshot.data(), isAccountPremium: !checkIfPremiumAccountExpired(snapshot.data().premiumAccountApplied) });
         } else {
           console.error("User not found.");
           setError("User not found.");

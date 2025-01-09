@@ -2,7 +2,7 @@ import database from "@react-native-firebase/database";
 import { useState, useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
 import { Platform } from "react-native";
-import { getFirestore, collection, query, onSnapshot, getDocs, serverTimestamp,  doc, updateDoc, average } from "firebase/firestore";
+import { getFirestore, collection, query, onSnapshot, getDocs, serverTimestamp,  doc, updateDoc, average, where } from "firebase/firestore";
 
  
  
@@ -107,11 +107,14 @@ const calculateAverageRating = (ratings) => {
         ...doc.data(), 
       }));
   
-      console.log(ratings);
-      return ratings;
+    
+      const averageRating = calculateAverageRating(ratings);
+  
+      console.log(`Average ratings: ${averageRating}`);
+      return { averageRating, ratings };
     } catch (error) {
       console.error("Error getting ratings: ", error);
-      return [];
+      return { averageRating: 0, ratings: [] };
     }
   };
   
@@ -121,6 +124,28 @@ const calculateAverageRating = (ratings) => {
         return getRatingsByServiceTypeWeb(type);
     }else{
         return getRatingsByServiceTypeMobile(type);
+    }
+  }
+
+
+  async function rateService(data, onSuccess, onFailure) {
+    try {
+      if (Platform.OS === "web") {
+        // Firestore instance for Web
+        const db = getFirestore();
+        const userRef = doc(db, "ratings"); // Path: ratings
+        await setDoc(userRef, data); // Set the document in Firestore
+      } else {
+        // Firestore instance for Mobile
+        const userRef = firestore().collection("ratings");
+        await userRef.add(data); // Use 'add()' to add a new document
+      }
+  
+      onSuccess();
+      console.log("User data created successfully!");
+    } catch (error) {
+      console.error("Error creating user data:", error);
+      onFailure(error);
     }
   }
 
@@ -136,5 +161,4 @@ const calculateAverageRating = (ratings) => {
 
 
 
-
-export {getServiceByType, getRatingsByServiceType};
+export {getServiceByType, getRatingsByServiceType, rateService};

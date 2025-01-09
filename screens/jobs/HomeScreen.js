@@ -64,7 +64,7 @@ function WebComponent({
   const renderItem = ({ item, index }) => {
     return (
       <TouchableOpacity onPress={() => {
-        onClick(item, index)
+        onClickCategory(item, index)
         console.log(item)
       }}>
         <View style={styles.gridItem}>

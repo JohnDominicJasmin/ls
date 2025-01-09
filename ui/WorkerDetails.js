@@ -2,14 +2,14 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import Resources from '../src/Resources';
 
-const WorkerDetails = ({workerPhotoUrl, workerName, serviceFee, discount, total}) => {
+const WorkerDetails = ({workerPhotoUrl, workerName, isPaid, serviceFee, discount, total}) => {
   return (
     <View style={styles.container}>
       {/* Worker Details */}
       <Text style={styles.sectionTitle}>Worker Details</Text>
       <View style={styles.workerRow}>
         <Image
-          source={{ uri: workerPhotoUrl }} // Replace with the actual image URL
+          source={workerPhotoUrl === ''? Resources.images.ic_profile : { uri: workerPhotoUrl }} // Replace with the actual image URL
           style={styles.workerImage}
         />
         <Text style={styles.workerName}>{workerName}</Text>
@@ -29,7 +29,7 @@ const WorkerDetails = ({workerPhotoUrl, workerName, serviceFee, discount, total}
       <View style={styles.totalRow}>
         <Text style={styles.totalLabel}>TOTAL</Text>
         <View style={styles.totalColumn}>
-          <Text style={styles.notPaidText}>Not yet Paid</Text>
+          <Text style={styles.notPaidText}>{isPaid ? 'Paid': 'Not yet Paid'}</Text>
           <Text style={styles.totalValue}>₱ {total}</Text>
         </View>
       </View>

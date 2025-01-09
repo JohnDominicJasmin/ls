@@ -7,16 +7,23 @@ import {
   ScrollView,
   Platform,
   TouchableOpacity,
+  Modal,
+  Pressable,
 } from "react-native";
 import TopAppBar from "../auth/components/TopAppBar";
 import Resources from "../../src/Resources";
 import React, { useEffect, useState } from "react";
 import { getUserData } from "../../utils/userDb";
 import DatePicker from "react-native-date-picker";
-import { isDiscountCodeExist, createBookingService } from "../../utils/bookingDb";
+import {
+  isDiscountCodeExist,
+  createBookingService,
+} from "../../utils/bookingDb";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
-
+import Spinner from "react-native-loading-spinner-overlay";
+import { useNavigation } from "@react-navigation/native";
+import { TimePickerModal, DatePickerModal } from "react-native-paper-dates";
 const ContactDetail = ({ style, address, phoneNumber }) => {
   return (
     <>
@@ -54,9 +61,10 @@ const ServiceInput = ({
   returnKeyType,
   onClickServiceInput,
   isEditable = true,
+  errorMessage = "",
 }) => {
   return (
-    <TouchableOpacity
+    <Pressable
       style={[
         {
           flex: 1, // Ensures equal width
@@ -83,61 +91,22 @@ const ServiceInput = ({
           returnKeyType={returnKeyType}
           style={styles.inputService}
         />
+        {errorMessage !== "" && (
+          <Text
+            style={{
+              color: Resources.colors.red,
+              fontSize: 12,
+            }}
+          >
+            {errorMessage}
+          </Text>
+        )}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
-const TimeOfServiceInput = ({
-  placeholder,
-  style,
-  value,
-  setValue,
-  keyboardType,
-  returnKeyType,
-}) => {
-  return (
-    <View
-      style={[
-        {
-          flex: 1, // Ensures equal width
-          marginLeft: 8, // Adds spacing between inputs (optional)
-        },
-        style,
-      ]}
-    >
-      <Text
-        style={{
-          fontSize: 14,
-        }}
-      >
-        {placeholder}
-      </Text>
-
-      <View
-        style={{
-          flexDirection: "row",
-          borderWidth: 1,
-          borderColor: Resources.colors.alto,
-          borderRadius: 12,
-          marginTop: 8,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <TextInput
-          value={value}
-          onChangeText={setValue}
-          keyboardType={keyboardType}
-          returnKeyType={returnKeyType}
-          style={styles.inputService_1}
-        />
-      </View>
-    </View>
-  );
-};
-
-const MultilineTextInputExample = ({ value, setValue }) => {
+const ServiceNote = ({ value, setValue }) => {
   return (
     <View style={styles.multilineInputContainer}>
       <TextInput
@@ -157,8 +126,9 @@ const AmountServiceInput = ({
   style,
   value,
   setValue,
-  keyboardType,
   returnKeyType,
+  onLostFocus,
+  errorMessage,
 }) => {
   return (
     <View
@@ -201,12 +171,37 @@ const AmountServiceInput = ({
         <TextInput
           value={value}
           onChangeText={setValue}
-          keyboardType={keyboardType}
+          keyboardType={"number-pad"}
           returnKeyType={returnKeyType}
           style={[styles.inputService_1, { paddingLeft: 28 }]}
+          onBlur={onLostFocus}
         />
       </View>
+      <Text
+        style={{
+          color: Resources.colors.red,
+          fontSize: 12,
+        }}
+      >
+        {errorMessage}
+      </Text>
     </View>
+  );
+};
+
+const ApplyDiscountButton = ({ style, disabled, onClickApply }) => {
+  return (
+    <TouchableOpacity disabled={disabled} style={style} onPress={onClickApply}>
+      <Text
+        style={{
+          color: disabled ? Resources.colors.alto : Resources.colors.royalBlue,
+          fontWeight: "semibold",
+          fontSize: 16,
+        }}
+      >
+        {"Apply"}
+      </Text>
+    </TouchableOpacity>
   );
 };
 
@@ -217,7 +212,28 @@ function MobileComponent({
   onClickServiceInput,
   dateOfService,
   onClickServiceTime,
-  timeOfService
+  timeOfService,
+
+  discountErrorMessage,
+  onClickApplyDiscount,
+
+  discountCode,
+  setDiscountCode,
+  minAmount,
+  setMinAmount,
+  maxAmount,
+  setMaxAmount,
+
+  onLostFocusMaxAmount,
+  onLostFocusMinAmount,
+
+  minAmountError,
+  maxAmountError,
+
+  isAccountPremium,
+  note,
+  setNote,
+  submitBookingService,
 }) {
   return (
     <>
@@ -242,15 +258,15 @@ function MobileComponent({
         }}
       >
         <ServiceInput
-        label={"11/14/2024"}
+          label={"11/14/2024"}
           value={dateOfService}
           style={{ flex: 1 }}
           placeholder={"Date of Service"}
           isEditable={false}
           onClickServiceInput={onClickServiceInput}
         />
-          <ServiceInput
-        label={"8: 00 AM"}
+        <ServiceInput
+          label={"8: 00 AM"}
           value={timeOfService}
           style={{ flex: 1 }}
           placeholder={"Time of Service"}
@@ -258,11 +274,46 @@ function MobileComponent({
           onClickServiceInput={onClickServiceTime}
         />
       </View>
-      <ServiceInput
-        style={{ width: "48%", marginTop: 16 }}
-        placeholder={"Discount or Voucher Code"}
-      />
 
+      <View>
+        <View
+          style={{
+            flexDirection: "row",
+            width: "63%",
+            marginTop: 16,
+            justifyContent: "center",
+            alignContent: "center",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <ServiceInput
+            keyboardType={"default"}
+            errorMessage={discountErrorMessage}
+            placeholder={"Discount or Voucher Code"}
+            value={discountCode}
+            setValue={setDiscountCode}
+            isEditable={isAccountPremium}
+            isAccountPremium={isAccountPremium}
+          />
+          <ApplyDiscountButton
+            disabled={!isAccountPremium}
+            onClickApply={onClickApplyDiscount}
+            style={{ marginTop: 20 }}
+          />
+        </View>
+        {!isAccountPremium && (
+          <Text
+            style={{
+              color: Resources.colors.alto,
+              fontSize: 12,
+              width: "50%",
+            }}
+          >
+            {"The feature is only available for premium accounts"}
+          </Text>
+        )}
+      </View>
       <Text
         style={{
           color: Resources.colors.alto,
@@ -282,13 +333,26 @@ function MobileComponent({
           marginTop: 24,
         }}
       >
-        <AmountServiceInput placeholder={"Minimum Amount"} />
-        <AmountServiceInput placeholder={"Maximum Amount"} />
+        <AmountServiceInput
+          value={minAmount}
+          setValue={setMinAmount}
+          placeholder={"Minimum Amount"}
+          onLostFocus={onLostFocusMinAmount}
+          errorMessage={minAmountError}
+        />
+        <AmountServiceInput
+          value={maxAmount}
+          setValue={setMaxAmount}
+          placeholder={"Maximum Amount"}
+          onLostFocus={onLostFocusMaxAmount}
+          errorMessage={maxAmountError}
+        />
       </View>
 
-      <MultilineTextInputExample />
+      <ServiceNote value={note} setValue={setNote} />
 
       <TouchableOpacity
+        onPress={submitBookingService}
         style={{
           backgroundColor: Resources.colors.royalBlue,
           alignSelf: "center", // Ensures the button width matches its content
@@ -311,7 +375,36 @@ function MobileComponent({
   );
 }
 
-function WebComponent() {
+function WebComponent({
+  name,
+  address,
+  phoneNumber,
+  onClickServiceInput,
+  dateOfService,
+  onClickServiceTime,
+  timeOfService,
+
+  discountErrorMessage,
+  onClickApplyDiscount,
+
+  discountCode,
+  setDiscountCode,
+  minAmount,
+  setMinAmount,
+  maxAmount,
+  setMaxAmount,
+
+  onLostFocusMaxAmount,
+  onLostFocusMinAmount,
+
+  minAmountError,
+  maxAmountError,
+
+  isAccountPremium,
+  note,
+  setNote,
+  submitBookingService,
+}) {
   return (
     <View style={{ flexDirection: "column" }}>
       <TopAppBar title="Book Service" />
@@ -323,7 +416,11 @@ function WebComponent() {
         }}
       >
         <View style={{ flex: 1, width: "50%" }}>
-          <ContactCard />
+          <ContactCard
+            name={name}
+            address={address}
+            phoneNumber={phoneNumber}
+          />
 
           <Text
             style={{
@@ -342,13 +439,62 @@ function WebComponent() {
               marginTop: 34,
             }}
           >
-            <ServiceInput placeholder={"Date of Service"} />
-            <TimeOfServiceInput placeholder={"Time of Service"} />
+            <ServiceInput
+              label={"11/14/2024"}
+              value={dateOfService}
+              style={{ flex: 1 }}
+              placeholder={"Date of Service"}
+              isEditable={false}
+              onClickServiceInput={onClickServiceInput}
+            />
+            <ServiceInput
+              label={"8: 00 AM"}
+              value={timeOfService}
+              style={{ flex: 1 }}
+              placeholder={"Time of Service"}
+              isEditable={false}
+              onClickServiceInput={onClickServiceTime}
+            />
           </View>
-          <ServiceInput
-            style={{ width: "50%" }}
-            placeholder={"Discount or Voucher Code"}
-          />
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                width: "63%",
+                marginTop: 16,
+                justifyContent: "center",
+                alignContent: "center",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <ServiceInput
+                keyboardType={"default"}
+                errorMessage={discountErrorMessage}
+                placeholder={"Discount or Voucher Code"}
+                value={discountCode}
+                setValue={setDiscountCode}
+                isEditable={isAccountPremium}
+                isAccountPremium={isAccountPremium}
+              />
+              <ApplyDiscountButton
+                disabled={!isAccountPremium}
+                onClickApply={onClickApplyDiscount}
+                style={{ marginTop: 20 }}
+              />
+            </View>
+            {!isAccountPremium && (
+              <Text
+                style={{
+                  color: Resources.colors.alto,
+                  fontSize: 12,
+                  width: "50%",
+                }}
+              >
+                {"The feature is only available for premium accounts"}
+              </Text>
+            )}
+          </View>
         </View>
         <View style={{ flex: 1, width: "50%" }}>
           <Text
@@ -370,13 +516,26 @@ function WebComponent() {
               marginTop: 24,
             }}
           >
-            <AmountServiceInput placeholder={"Minimum Amount"} />
-            <AmountServiceInput placeholder={"Maximum Amount"} />
+            <AmountServiceInput
+              value={minAmount}
+              setValue={setMinAmount}
+              placeholder={"Minimum Amount"}
+              onLostFocus={onLostFocusMinAmount}
+              errorMessage={minAmountError}
+            />
+            <AmountServiceInput
+              value={maxAmount}
+              setValue={setMaxAmount}
+              placeholder={"Maximum Amount"}
+              onLostFocus={onLostFocusMaxAmount}
+              errorMessage={maxAmountError}
+            />
           </View>
 
-          <MultilineTextInputExample />
+          <ServiceNote value={note} setValue={setNote} />
 
           <TouchableOpacity
+            onPress={submitBookingService}
             style={{
               backgroundColor: Resources.colors.royalBlue,
               alignSelf: "center", // Ensures the button width matches its content
@@ -401,28 +560,64 @@ function WebComponent() {
   );
 }
 
-function BookServiceScreen() {
+function BookServiceScreen({ route }) {
+  const { serviceId, serviceTypeName, serviceName, maxPrice, minPrice, serviceImage } =
+    route.params;
+  const navigation = useNavigation();
   const [currentUser, setUser] = useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
-
   const [fullName, setFullName] = useState("");
-
-  
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [address, setAddress] = useState("");
-    const [fullAddress, setFullAddress] = useState("")
-    const [barangay, setBarangay] = useState("");
-    const [city, setCity] = useState("");
-    const [province, setProvince] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountErrorMessage, setDiscountErrorMessage] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
+  const [barangay, setBarangay] = useState("");
+  const [city, setCity] = useState("");
+  const [province, setProvince] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [note, setNote] = useState("");
+  const [isAccountPremium, setIsAccountPremium] = useState(false);
 
   const [date, setDate] = useState(new Date());
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState("");
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
   const [isTimePickerOpen, setTimePickerOpen] = useState(false);
+  const [minAmount, setMinAmount] = useState(minPrice);
+  const [maxAmount, setMaxAmount] = useState(maxPrice);
+  const [minAmountError, setMinAmountError] = useState("");
+  const [maxAmountError, setMaxAmountError] = useState("");
 
+  const onDismissTimePicker = React.useCallback(() => {
+    setTimePickerOpen(false);
+  }, [setTimePickerOpen]);
+
+  const onConfirmTimePicker = React.useCallback(({ hours, minutes }) => {
+    setTimePickerOpen(false);
+
+    const period = hours >= 12 ? "PM" : "AM";
+    const adjustedHours = hours % 12 || 12;
+
+    const formatted = `${adjustedHours}:${minutes
+      .toString()
+      .padStart(2, "0")} ${period}`;
+    setTime(formatted);
+  }, []);
+
+  const onDismissDatePicker = React.useCallback(() => {
+    setDatePickerOpen(false);
+  }, [setDatePickerOpen]);
+
+  const onConfirmDatePicker = React.useCallback(
+    (params) => {
+      setDatePickerOpen(false);
+      setDate(params.date);
+    },
+    [setDatePickerOpen, setDate]
+  );
   useEffect(() => {
     const fetchUser = async () => {
       setIsLoading(true);
@@ -444,58 +639,158 @@ function BookServiceScreen() {
   const { user, error } = getUserData(currentUser?.uid);
   useEffect(() => {
     if (user) {
-      if (user) {
-        setFullName(user.firstName + " " + user.lastName);
-        setFirstName(user.firstName);
-        setLastName(user.lastName);
-        setBarangay(user.barangay);
-        setCity(user.city);
-        setProvince(user.province);
-        setAddress(user.address)
-        setPhoneNumber(user.phoneNumber);
-        const fullAddress =
-          user.address +
-          ", " +
-          user.barangay +
-          ", " +
-          user.city +
-          ", " +
-          user.province;
-        setFullAddress(fullAddress);
-      }
+      console.log(`Is account premium: ${user.isAccountPremium}`);
+      setFullName(user.firstName + " " + user.lastName);
+      setFirstName(user.firstName);
+      setLastName(user.lastName);
+      setBarangay(user.barangay);
+      setCity(user.city);
+      setProvince(user.province);
+      setAddress(user.address);
+      setPhoneNumber(user.phoneNumber);
+      setIsAccountPremium(user.isAccountPremium);
+      const fullAddress =
+        user.address +
+        ", " +
+        user.barangay +
+        ", " +
+        user.city +
+        ", " +
+        user.province;
+      setFullAddress(fullAddress);
     }
   }, [user]);
 
+  const onClickApplyDiscount = React.useCallback(async () => {
+    const result = await isDiscountCodeExist(discountCode);
+    if (discountCode == "") {
+      setDiscountErrorMessage("Please enter a discount code");
+      return;
+    }
+
+    if (result === null) {
+      setDiscountErrorMessage("Voucher doesn't exist");
+      return;
+    }
+    setDiscountErrorMessage("");
+    setDiscount(result.percentage);
+  }, [discountCode]);
+
+  const submitBookingService = () => {
+    const onSuccess = (docId) => {
+      console.log(`Booking created successfully with ID: ${docId}`);
+      setIsLoading(false);
+      navigation.replace("Main"); // Replace to go directly to MainTabNavigator without the option to go back
+
+      navigation.navigate("Bookings");
+    };
+
+    const onFailure = (error) => {
+      console.error("Failed to create booking:", error);
+      setIsLoading(false);
+    };
+
+    const bookingData = {
+      address: address,
+      barangay: barangay,
+      servicePhotoUrl: serviceImage,
+      bookedService: serviceName,
+      city: city,
+      code: discountCode,
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      discountPercentage: discount,
+      isActive: true,
+      isPaid: false,
+      maxBudget: maxAmount,
+      minBudget: minAmount,
+      name: fullName,
+      phoneNumber: phoneNumber,
+      province: province,
+      serviceId: serviceId,
+      userId: currentUser?.uid,
+      serviceFee: 0,
+      totalAmount: 0,
+      workerFullName: "",
+      workerPhotoURL: "",
+      note: note,
+      fullAddress: fullAddress,
+      admin_total: 0,
+      admin_serviceFee: 0,
+      admin_discountOrVoucher: 0,
+      isDone: false,
+      serviceTypeName: serviceTypeName,
+      isRated: false,
+    };
+
+    const isMinAmountValid = minAmount >= minPrice;
+
+    if (!isMinAmountValid) {
+      setMinAmountError(`Amount must be greater than or equal to ₱${minPrice}`);
+      return;
+    }
+    const isMaxAmountValid = maxAmount <= maxPrice;
+
+    if (!isMaxAmountValid) {
+      setMaxAmountError(`Amount must be less than or equal to ₱${maxPrice}`);
+      return;
+    }
+    if (maxAmount == "") {
+      setMaxAmountError("Please enter a valid amount");
+      return;
+    }
+    if (minAmount == "") {
+      setMinAmountError("Please enter a valid amount");
+      return;
+    }
+    setIsLoading(true);
+
+    createBookingService(bookingData, onSuccess, onFailure);
+  };
+
+  const onLostFocusMinAmount = React.useCallback(() => {
+    const isMinAmountValid = minAmount >= minPrice;
+
+    if (!isMinAmountValid) {
+      setMinAmountError(`Amount must be greater than or equal to ₱${minPrice}`);
+    }
+  }, [minAmount, minPrice]);
+
+  const onLostFocusMaxAmount = React.useCallback(() => {
+    const isMaxAmountValid = maxAmount <= maxPrice;
+
+    if (!isMaxAmountValid) {
+      setMaxAmountError(`Amount must be less than or equal to ₱${maxPrice}`);
+    }
+  }, [maxAmount, maxPrice]);
+
   return (
     <View style={{ flex: 1 }}>
-      <DatePicker
-        modal
-        open={isDatePickerOpen}
-        date={date}
-        mode="date"
-        onConfirm={(date) => {
-          setDatePickerOpen(false);
-          setDate(date);
-          console.log(`Date is ${date}`);
-        }}
-        onCancel={() => {
-          setDatePickerOpen(false);
-        }}
+      <Spinner
+        visible={isLoading}
+        textContent={"Loading..."}
+        textStyle={{ color: Resources.colors.white }}
       />
 
-      <DatePicker
-        modal
-        open={isTimePickerOpen}
-        mode="time"
-        date={time}
-        onConfirm={(time) => {
-          setTimePickerOpen(false);
-          setTime(time);
-        }}
-        onCancel={() => {
-          setTimePickerOpen(false);
-        }}
+      <TimePickerModal
+        visible={isTimePickerOpen}
+        onDismiss={onDismissTimePicker}
+        onConfirm={onConfirmTimePicker}
+        hours={12}
+        minutes={14}
+        label="Select time"
+        animationType="fade"
       />
+
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={isDatePickerOpen}
+        onDismiss={onDismissDatePicker}
+        date={date}
+        onConfirm={onConfirmDatePicker}
+      />
+
       <ScrollView
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
@@ -505,21 +800,76 @@ function BookServiceScreen() {
         }}
       >
         {Platform.OS === "web" ? (
-          <WebComponent />
-        ) : (
-          <MobileComponent
+          <WebComponent
+            isAccountPremium={isAccountPremium}
+            minAmountError={minAmountError}
+            maxAmountError={maxAmountError}
             name={fullName}
+            setMinAmount={(amount) => {
+              setMinAmount(amount);
+              setMinAmountError("");
+            }}
+            setMaxAmount={(amount) => {
+              setMaxAmount(amount);
+              setMaxAmountError("");
+            }}
+            onLostFocusMaxAmount={onLostFocusMaxAmount}
+            onLostFocusMinAmount={onLostFocusMinAmount}
+            minAmount={minAmount.toString()}
+            maxAmount={maxAmount.toString()}
             dateOfService={date.toLocaleDateString()}
             phoneNumber={phoneNumber}
-            address={address}
-            timeOfService={time.toLocaleTimeString()}
+            address={fullAddress}
+            timeOfService={time}
             onClickServiceInput={() => {
               setDatePickerOpen(true);
             }}
             onClickServiceTime={() => {
-                setTimePickerOpen(true)
+              setTimePickerOpen(true);
             }}
-
+            discountErrorMessage={discountErrorMessage}
+            onClickApplyDiscount={onClickApplyDiscount}
+            discountCode={discountCode}
+            setDiscountCode={setDiscountCode}
+            note={note}
+            setNote={setNote}
+            submitBookingService={submitBookingService}
+          />
+        ) : (
+          <MobileComponent
+            isAccountPremium={isAccountPremium}
+            minAmountError={minAmountError}
+            maxAmountError={maxAmountError}
+            name={fullName}
+            setMinAmount={(amount) => {
+              setMinAmount(amount);
+              setMinAmountError("");
+            }}
+            setMaxAmount={(amount) => {
+              setMaxAmount(amount);
+              setMaxAmountError("");
+            }}
+            onLostFocusMaxAmount={onLostFocusMaxAmount}
+            onLostFocusMinAmount={onLostFocusMinAmount}
+            minAmount={minAmount.toString()}
+            maxAmount={maxAmount.toString()}
+            dateOfService={date.toLocaleDateString()}
+            phoneNumber={phoneNumber}
+            address={fullAddress}
+            timeOfService={time}
+            onClickServiceInput={() => {
+              setDatePickerOpen(true);
+            }}
+            onClickServiceTime={() => {
+              setTimePickerOpen(true);
+            }}
+            discountErrorMessage={discountErrorMessage}
+            onClickApplyDiscount={onClickApplyDiscount}
+            discountCode={discountCode}
+            setDiscountCode={setDiscountCode}
+            note={note}
+            setNote={setNote}
+            submitBookingService={submitBookingService}
           />
         )}
       </ScrollView>

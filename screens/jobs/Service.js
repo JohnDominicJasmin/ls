@@ -12,7 +12,6 @@ import {
 import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
-import FastImage from "react-native-fast-image";
 import {
   getServiceByType,
   getRatingsByServiceType,
@@ -21,15 +20,13 @@ import { useState, useEffect } from "react";
 import { average } from "firebase/firestore";
 
 const ReviewsSection = ({ ratings, averageRating }) => {
-  const renderItem = ({item}) => {
+  const renderItem = ({ item }) => {
     return (
       <View style={{ flexDirection: "column" }}>
         <View style={styles.reviewItemContainer}>
           <View style={styles.textContainerItemRating}>
             <Text style={styles.usernameItemRating}>{item.name}</Text>
-            <Text style={styles.commentItemRating}>
-              {item.comment}
-            </Text>
+            <Text style={styles.commentItemRating}>{item.comment}</Text>
           </View>
           <View style={styles.ratingContainerItemRating}>
             <Image
@@ -45,11 +42,19 @@ const ReviewsSection = ({ ratings, averageRating }) => {
     );
   };
   return (
-    <View style={styles.containerItemRating}>
-      {/* Section Title */}
-      <Text style={styles.titleItemRating}>Ratings and Reviews</Text>
-      <FlatList data={ratings} renderItem={renderItem} keyExtractor={(item, index) => index.toString()}/>
-    </View>
+    <>
+      {ratings?.length > 0 && (
+        <View style={styles.containerItemRating}>
+          {/* Section Title */}
+          <Text style={styles.titleItemRating}>Ratings and Reviews</Text>
+          <FlatList
+            data={ratings}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
+      )}
+    </>
   );
 };
 const ServiceItem = ({
@@ -101,11 +106,19 @@ const ServiceItem = ({
     </Pressable>
   );
 };
-function MobileComponent({ openBookService, imageUrl, services, ratings, averageRating }) {
+function MobileComponent({
+  openBookService,
+  imageUrl,
+  services,
+  ratings,
+  averageRating,
+}) {
   const renderItem = ({ item }) => {
     return (
       <ServiceItem
-      onPress={openBookService}
+        onPress={() => {
+          openBookService(item);
+        }}
         itemName={item.name}
         imageUrl={item.imageUrl}
         includes={item.includes}
@@ -126,13 +139,13 @@ function MobileComponent({ openBookService, imageUrl, services, ratings, average
       }}
     >
       <View>
-        <FastImage
+        <Image
           style={{
             width: "100%",
             height: 250,
             resizeMode: "cover",
           }}
-          source={{ uri: imageUrl, priority: FastImage.priority.high }}
+          source={{ uri: imageUrl }}
         />
         <BackIcon
           style={{
@@ -152,13 +165,36 @@ function MobileComponent({ openBookService, imageUrl, services, ratings, average
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
-        <ReviewsSection ratings={ratings} averageRating={averageRating}/>
+        <ReviewsSection ratings={ratings} averageRating={averageRating} />
       </View>
     </View>
   );
 }
 
-function WebComponent({ openBookService }) {
+function WebComponent({
+  openBookService,
+  imageUrl,
+  services,
+  ratings,
+  averageRating,
+}) {
+  const renderItem = ({ item }) => {
+    return (
+      <ServiceItem
+        onPress={() => {
+          openBookService(item);
+        }}
+        containerStyle={{ width: 450, padding: 5 }}
+        itemName={item.name}
+        imageUrl={item.imageUrl}
+        includes={item.includes}
+        asPerDescription={item.asperDescription}
+        minPrice={item.min_price}
+        maxPrice={item.max_price}
+        rating={item.rating}
+      />
+    );
+  };
   return (
     <View
       style={{
@@ -183,17 +219,17 @@ function WebComponent({ openBookService }) {
         <View style={{ flex: 1, flexDirection: "column" }}>
           <Image
             style={{
-              width: "100%",
-              height: 250,
+              width: "70%",
+              height: 300,
               resizeMode: "cover",
             }}
-            source={Resources.images.ic_home_page_banner}
+            source={{ uri: imageUrl }}
           />
-          <ServiceItem
-            containerStyle={{
-              width: "50%",
-            }}
-            onPress={openBookService}
+          <FlatList
+            data={services}
+            renderItem={renderItem}
+            keyExtractor={(item, index) => index.toString()}
+            numColumns={2}
           />
         </View>
 
@@ -203,7 +239,8 @@ function WebComponent({ openBookService }) {
             width: "35%",
           }}
         >
-          <ReviewsSection />
+        <ReviewsSection ratings={ratings} averageRating={averageRating} />
+
         </View>
       </View>
     </View>
@@ -215,15 +252,23 @@ export default function ServiceScreen({ route }) {
   const { name, image } = route.params;
   const [services, setServices] = useState([]);
   const [ratings, setRatings] = useState([]);
-  const [averageRating, setAverageRating] = useState(0)
+  const [averageRating, setAverageRating] = useState(0);
 
-  const navigateBookService = () => {
-    navigation.navigate("BookService");
+  const navigateBookService = (item) => {
+    navigation.navigate("BookService", {
+      serviceId: item.id,
+      serviceName: item.name,
+      maxPrice: item.max_price,
+      minPrice: item.min_price,
+      serviceTypeName: name,
+      serviceImage: item.imageUrl
+    });
   };
 
   useEffect(() => {
     const fetchServices = async () => {
       const fetchedServices = await getServiceByType(name);
+      console.log(`Featched services are ${JSON.stringify(fetchedServices)}`);
       setServices(fetchedServices);
     };
 
@@ -232,9 +277,10 @@ export default function ServiceScreen({ route }) {
 
   useEffect(() => {
     const fetchRatings = async () => {
-      const {averageRating, ratings} = await getRatingsByServiceType(name);
+      const { averageRating, ratings } = await getRatingsByServiceType(name);
+      console.log(`Featched ratings are ${JSON.stringify(ratings)} - ${name}`);
       setRatings(ratings);
-      setAverageRating(averageRating)
+      setAverageRating(averageRating);
     };
 
     fetchRatings();
@@ -252,7 +298,13 @@ export default function ServiceScreen({ route }) {
         }}
       >
         {Platform.OS === "web" ? (
-          <WebComponent openBookService={navigateBookService} />
+          <WebComponent
+            openBookService={navigateBookService}
+            imageUrl={image}
+            services={services}
+            ratings={ratings}
+            averageRating={averageRating}
+          />
         ) : (
           <MobileComponent
             openBookService={navigateBookService}

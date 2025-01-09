@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  TextInput,
   Image,
   Platform,
   TouchableOpacity,
@@ -17,49 +18,20 @@ import TopAppBar from "../auth/components/TopAppBar";
 import { FlatList } from "react-native";
 import { ContactDetail } from "./BookServiceScreen";
 import WorkerDetails from "../../ui/WorkerDetails";
+import {
+  cancelBooking,
+  markAsRated,
+  useActiveUserBookings,
+  useDoneUserBookings,
+} from "../../utils/bookingDb";
+
+import { rateService } from "../../utils/servicesDb";
+
+import { Button, Dialog, CheckBox, ListItem, Avatar } from "@rneui/themed";
+import RatingStars from "../../ui/RatingStars";
 const ACTIVE = "Active";
 const DONE = "Done";
 
-const mockData = [
-  {
-    photoUrl:
-      "https://res.cloudinary.com/drbsytcgb/image/upload/v1736172117/Washing_Machine_Repair_gifdy2.png",
-    name: "Sample Name",
-    dateCreated: "November 12, 2024",
-    timeCreated: "9:08 PM",
-    minAmount: 1000,
-    maxAmount: 2000,
-    address: "123 Sampaguita St. San Vicente, Sto. Tomas, Batangas",
-    phoneNumber: "+63 952 852 5528",
-    isExpanded: true,
-    workerDetails: {
-        workerPhoto: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-        workerName: "John Dominic",
-        serviceFee: 1800,
-        discount: 500,
-        total: 2000
-    }
-  },
-  {
-    photoUrl:
-      "https://res.cloudinary.com/drbsytcgb/image/upload/v1736172117/Washing_Machine_Repair_gifdy2.png",
-    name: "John Name",
-    dateCreated: "November 3, 2024",
-    timeCreated: "1:08 PM",
-    minAmount: 1400,
-    maxAmount: 2300,
-    address: "123 Sampaguita St. San Vicente, Sto. Tomas, Batangas",
-    phoneNumber: "+63 952 852 5528",
-    isExpanded: false,
-    workerDetails: {
-        workerPhoto: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-        workerName: "John Dominic",
-        serviceFee: 1800,
-        discount: 500,
-        total: 2000
-    }
-  },
-];
 const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
   <View style={styles.guestContainer}>
     <View
@@ -84,6 +56,66 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
     />
   </View>
 );
+const RateAndPaidSection = ({ onClickRate, onClickPaid }) => {
+  return (
+    <>
+      <View style={{ flexDirection: "row", gap: 8, marginVertical: 12 }}>
+        <TouchableOpacity
+          onPress={onClickRate}
+          style={{
+            flex: 1,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              borderWidth: 1,
+              borderColor: Resources.colors.royalBlue,
+              justifyContent: "center",
+              borderRadius: 8,
+              gap: 8,
+              paddingVertical: 12,
+              alignItems: "center",
+            }}
+          >
+            <Image
+              style={{
+                height: 20,
+                width: 20,
+                tintColor: Resources.colors.royalBlue,
+              }}
+              source={Resources.icons.ic_star}
+            />
+            <Text style={{ color: Resources.colors.royalBlue }}>{"Rate"}</Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={onClickPaid}
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            borderRadius: 8,
+            gap: 8,
+            paddingVertical: 12,
+            alignItems: "center",
+            backgroundColor: Resources.colors.royalBlue,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 14,
+              color: Resources.colors.white,
+              fontWeight: "semibold",
+            }}
+          >
+            {"Mark as Paid"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+};
 function Indicator({ indicatorActive, selectIndicator }) {
   const getBorderBottomColor = (indicator) => {
     return indicatorActive === indicator
@@ -150,8 +182,8 @@ function Indicator({ indicatorActive, selectIndicator }) {
   );
 }
 const DashedDivider = () => {
-    return <View style={styles.dashedLine} />;
-  };
+  return <View style={styles.dashedLine} />;
+};
 function ServiceItem({
   photoUrl,
   name,
@@ -162,7 +194,21 @@ function ServiceItem({
   isExpanded,
   onClickCancel,
   onExpand,
-  workerDetails
+  workerId,
+  workerName,
+  workerPhotoUrl,
+  serviceFee,
+  discount,
+  total,
+
+  address,
+  phoneNumber,
+  isPaid,
+  isDone,
+  isActive,
+
+  onClickRate,
+  onClickPaid,
 }) {
   return (
     <View style={styles.serviceItem}>
@@ -221,16 +267,51 @@ function ServiceItem({
       </View>
 
       {isExpanded && (
-        <View style={{
-            paddingHorizontal: 8
-        }}>
+        <View
+          style={{
+            paddingHorizontal: 8,
+          }}
+        >
           <ContactDetail
             style={{ gap: 4 }}
-            address={"Sample Address"}
-            phoneNumber={"09263208902"}
+            address={address}
+            phoneNumber={phoneNumber}
           />
-          <DashedDivider/>
-          {workerDetails !== undefined&& (<WorkerDetails workerPhotoUrl={workerDetails.workerPhoto} workerName={workerDetails.workerName} serviceFee={workerDetails.serviceFee} discount={workerDetails.discount} total={workerDetails.total} />)}
+          <DashedDivider />
+          {workerName !== "" ? (
+            <View>
+              <WorkerDetails
+                isPaid={isPaid}
+                workerPhotoUrl={workerPhotoUrl}
+                workerName={workerName}
+                serviceFee={serviceFee}
+                discount={discount}
+                total={total}
+              />
+              {isActive && !isDone && (
+                <>
+                  <RateAndPaidSection
+                    onClickPaid={onClickPaid}
+                    onClickRate={onClickRate}
+                  />
+                </>
+              )}
+            </View>
+          ) : (
+            <>
+              <Text
+                style={{
+                  padding: 16,
+                  fontSize: 14,
+                  color: Resources.colors.alto,
+                  width: "100%",
+                  textAlign: "center",
+                }}
+              >
+                {"Worker Details will be added here later"}
+              </Text>
+            </>
+          )}
         </View>
       )}
 
@@ -256,7 +337,7 @@ function ServiceItem({
                 color: Resources.colors.royalBlue,
               }}
             >
-              {"See More"}
+              {"See Less"}
             </Text>
           ) : (
             <Text
@@ -264,7 +345,7 @@ function ServiceItem({
                 color: Resources.colors.royalBlue,
               }}
             >
-              {"See Less"}
+              {"See More"}
             </Text>
           )}
         </TouchableOpacity>
@@ -272,18 +353,49 @@ function ServiceItem({
     </View>
   );
 }
-function MobileContent({ indicatorActive, selectIndicator }) {
+function MobileContent({
+  indicatorActive,
+  selectIndicator,
+  doneBookings,
+  bookings,
+  cancelBooking,
+
+  onClickRate,
+  onClickPaid,
+}) {
+  const [itemExpanded, setItemExpanded] = useState("");
+
   const renderItem = ({ item, index }) => {
     return (
       <ServiceItem
-        photoUrl={item.photoUrl}
+        photoUrl={item.servicePhotoUrl}
         name={item.name}
-        dateCreated={item.dateCreated}
-        timeCreated={item.timeCreated}
-        minAmount={item.minAmount}
-        maxAmount={item.maxAmount}
-        isExpanded={item.isExpanded}
-        workerDetails={item.workerDetails}
+        dateCreated={item.date}
+        timeCreated={item.time}
+        minAmount={item.minBudget}
+        maxAmount={item.maxBudget}
+        address={item.fullAddress}
+        phoneNumber={item.phoneNumber}
+        workerId={item.serviceId}
+        isDone={item.isDone}
+        workerName={item.workerFullName}
+        workerPhotoUrl={item.workerPhotoURL}
+        serviceFee={item.admin_serviceFee}
+        discount={item.admin_discountOrVoucher}
+        total={item.totalAmount}
+        isActive={item.isActive}
+        isPaid={item.isPaid}
+        onClickCancel={() => cancelBooking(item.id)}
+        onExpand={() => {
+          if (itemExpanded == item.id) {
+            setItemExpanded("");
+            return;
+          }
+          setItemExpanded(item.id);
+        }}
+        isExpanded={itemExpanded == item.id}
+        onClickPaid={() => onClickPaid(item.id)}
+        onClickRate={() => onClickRate(item)}
       />
     );
   };
@@ -294,6 +406,7 @@ function MobileContent({ indicatorActive, selectIndicator }) {
         backgroundColor: Resources.colors.white,
         marginTop: 34,
         width: "100%",
+        height: "100%",
       }}
     >
       <Indicator
@@ -301,21 +414,19 @@ function MobileContent({ indicatorActive, selectIndicator }) {
         selectIndicator={selectIndicator}
       />
 
- 
-  <FlatList
-    data={mockData}
-    style={{
-      marginHorizontal: 20,
-    }}
-    ListFooterComponent={<View />}
-    ListFooterComponentStyle={{height:150}}
-    contentContainerStyle={{
-      paddingBottom: 50, // Add bottom padding
-    }}
-    renderItem={renderItem}
-    keyExtractor={(item, index) => index.toString()} // Use a unique key if available
-  />
- 
+      <FlatList
+        data={indicatorActive === ACTIVE ? bookings : doneBookings}
+        style={{
+          marginHorizontal: 20,
+        }}
+        ListFooterComponent={<View />}
+        ListFooterComponentStyle={{ height: 150 }}
+        contentContainerStyle={{
+          paddingBottom: 50, // Add bottom padding
+        }}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()} // Use a unique key if available
+      />
     </View>
   );
 }
@@ -326,6 +437,10 @@ function BookingsScreen() {
   const [user, setUser] = useState(null);
   const navigation = useNavigation();
   const [selectedIndicator, setSelectedIndicator] = useState(ACTIVE);
+  const [cancelBookingId, setCancelBookingId] = useState(null);
+  const [ratingItem, setRatingItem] = useState(null);
+  const [ratingComment, setRatingComment] = useState("");
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -341,6 +456,9 @@ function BookingsScreen() {
     fetchUser();
   }, []);
 
+  const { doneBookings, bookingsError } = useDoneUserBookings(user?.uid);
+  const { userBookings, error } = useActiveUserBookings(user?.uid);
+
   const onClickCreateAccount = () => {
     navigation.navigate("SignUp");
   };
@@ -349,10 +467,123 @@ function BookingsScreen() {
     navigation.navigate("Login");
   };
 
+  const onClickCancelBooking = React.useCallback((id) => {
+    setCancelBookingId(id);
+  }, []);
+
+  const onDismissCancelBookingDialog = React.useCallback(() => {
+    setCancelBookingId(null);
+  }, []);
+
+  const confirmBookingCancellation = React.useCallback(async () => {
+    await cancelBooking(
+      cancelBookingId,
+      (successMessage) => {
+        const filteredBookings = userBookings.filter(
+          (item) => item.id !== cancelBookingId
+        );
+        setCancelBookingId(null);
+      },
+      (error) => {
+        console.error("Failed to cancel booking:", error);
+      }
+    );
+  }, [cancelBookingId]);
+
+  const onClickRate = React.useCallback((item) => {
+    setRatingItem(item);
+    console.log(`Rating item is ${JSON.stringify(item)}`);
+  }, []);
+
+  const onDismissRatingDialog = React.useCallback(() => {
+    setRatingItem(null);
+    setRatingComment("");
+    setRating(0);
+  }, []);
+
+  const confirmRating = React.useCallback(async () => {
+    setRatingItem(null);
+    setRatingComment("");
+    setRating(0);
+    const data = {
+      comment: ratingComment,
+      name: ratingItem.name,
+      rating: rating,
+      serviceType: ratingItem.serviceTypeName,
+    };
+
+    await rateService(
+      data,
+      () => {
+
+        markAsRated(
+          ratingItem.id,
+          () => {
+              console.log('Rated successfully')
+
+          },
+          () => {
+            console.log('Rated failed')
+            
+          }
+        );
+      },
+      () => {}
+    );
+  }, [ratingItem, ratingComment, rating, ratingItem]);
+
+  const onClickPaid = React.useCallback((id) => {}, []);
+
   return (
     <>
       <View style={styles.container}>
         <TopAppBar title="Booked Home Services" />
+
+        <Dialog
+          isVisible={cancelBookingId !== null}
+          onBackdropPress={onDismissCancelBookingDialog}
+        >
+          <Dialog.Title title="Cancel Booked Service?" />
+          <Text>Are you sure you want to cancel your booked service?</Text>
+          <Dialog.Actions>
+            <Dialog.Button
+              title="Confirm Cancellation"
+              onPress={confirmBookingCancellation}
+            />
+            <Dialog.Button
+              title="Keep Booking"
+              onPress={onDismissCancelBookingDialog}
+            />
+          </Dialog.Actions>
+        </Dialog>
+
+        <Dialog
+          isVisible={ratingItem !== null}
+          onBackdropPress={onDismissRatingDialog}
+        >
+          <Dialog.Title title="Rate Booked Service" />
+          <Text>How would you rate your booked service?</Text>
+          <RatingStars rating={rating} setRating={setRating} />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Write your comment here..."
+            value={ratingComment}
+            onChangeText={setRatingComment}
+            multiline
+            numberOfLines={3}
+          />
+          <Dialog.Actions>
+            <Dialog.Button
+              title="Confirm Cancellation"
+              onPress={confirmRating}
+            />
+            <Dialog.Button
+              title="Keep Booking"
+              onPress={onDismissRatingDialog}
+            />
+          </Dialog.Actions>
+        </Dialog>
+
         {user && user.isAnonymous ? (
           <GuestAccountDisplay
             onClickCreateAccount={onClickCreateAccount}
@@ -364,8 +595,13 @@ function BookingsScreen() {
               <WebComponent />
             ) : (
               <MobileContent
+                bookings={userBookings}
+                doneBookings={doneBookings}
                 selectIndicator={setSelectedIndicator}
                 indicatorActive={selectedIndicator}
+                cancelBooking={onClickCancelBooking}
+                onClickPaid={onClickPaid}
+                onClickRate={onClickRate}
               />
             )}
           </>
@@ -377,7 +613,6 @@ function BookingsScreen() {
 
 const styles = StyleSheet.create({
   container: {
-
     alignItems: "center",
     backgroundColor: Resources.colors.white,
   },
@@ -430,9 +665,19 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     borderWidth: 0.9, // Thickness of the line
     borderColor: Resources.colors.alto, // Color of the line
-    borderStyle: 'dashed', // Make the line dashed
-    width: '100%', // Full width of the container
-    alignSelf: 'center', // Center align the line
+    borderStyle: "dashed", // Make the line dashed
+    width: "100%", // Full width of the container
+    alignSelf: "center", // Center align the line
+  },
+  textInput: {
+    height: 100,
+    width: "100%",
+    borderColor: "#CCCCCC",
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 15,
+    textAlignVertical: "top",
   },
 });
 export default BookingsScreen;
