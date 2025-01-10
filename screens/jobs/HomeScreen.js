@@ -46,7 +46,9 @@ function WebComponent({
   displayName,
   onClickCategory,
   onClickBookings,
-  categories
+  categories,
+  isAccountPremium,
+  onClickSearch
   
 }) {
   const data = mockData();
@@ -60,6 +62,7 @@ function WebComponent({
   const onClickProfileSelection = React.useCallback(() => {
     setShouldShowProfileSelections((prev) => !prev);
   }, []);
+  
 
   const renderItem = ({ item, index }) => {
     return (
@@ -87,7 +90,17 @@ function WebComponent({
         paddingVertical: 16,
       }}
     >
-      <NavigationBar user={user} userPhoto={userPhoto} onClickProfileSelection={onClickProfileSelection} onClickNotification={onClickNotification} onClickSignIn={onClickSignIn} onClickSignUp={onClickSignUp} onClickBookings={onClickBookings}/>
+      <NavigationBar
+        user={user}
+        userPhoto={userPhoto}
+        onClickProfileSelection={onClickProfileSelection}
+        onClickNotification={onClickNotification}
+        onClickSignIn={onClickSignIn}
+        onClickSignUp={onClickSignUp}
+        onClickBookings={onClickBookings}
+        isAccountPremium={isAccountPremium}
+        onClickSearch={onClickSearch}
+      />
 
       <View
         style={{
@@ -104,12 +117,16 @@ function WebComponent({
           }}
         >
           {user && !user?.isAnonymous ? (
-                    <Text style={[styles.helloText, ]} numberOfLines={2} ellipsizeMode="tail">
-                      {"Hello, " + displayName}
-                    </Text>
-                  ) : (
-                    <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
-                  )}
+            <Text
+              style={[styles.helloText]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {"Hello, " + displayName}
+            </Text>
+          ) : (
+            <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
+          )}
           <Text
             style={{
               color: Resources.colors.gray_1,
@@ -244,7 +261,7 @@ function WebComponent({
   );
 }
 
-function MobileComponent({ user, displayName, userPhoto, navigateNotification, onClickCategory, categories }) {
+function MobileComponent({ user, displayName, userPhoto, navigateNotification, onClickCategory, categories, onClickSearch, isAccountPremium }) {
   
   return (
     <KeyboardAvoidingView
@@ -269,7 +286,7 @@ function MobileComponent({ user, displayName, userPhoto, navigateNotification, o
                     flex: 1,
                   }}
                 >
-                  {user && !user?.isAnonymous && <ProfileImage user={user} photoUrl={userPhoto} />}
+                  {user && !user?.isAnonymous && <ProfileImage user={user} photoUrl={userPhoto} isAccountPremium={isAccountPremium}/>}
 
                   {user && !user?.isAnonymous ? (
                     <Text style={[styles.helloText, ]} numberOfLines={2} ellipsizeMode="tail">
@@ -295,7 +312,7 @@ function MobileComponent({ user, displayName, userPhoto, navigateNotification, o
                 {"Welcome back to LaborSeek!"}
               </Text>
 
-              <SearchBar styleContainer={{ marginTop: 16 }} />
+              <SearchBar styleContainer={{ marginTop: 16 }} isEditable={false} onPress={onClickSearch} />
               <GridCategories onClick={onClickCategory} categories={categories}/>
               <PosterImage />
             </View>
@@ -356,7 +373,7 @@ const NotificationButton = ({ onPress }) => {
   );
 };
 
-const ProfileImage = ({ photoUrl, onPress }) => {
+const ProfileImage = ({ photoUrl, onPress, isAccountPremium }) => {
   return (
     <View>
       <TouchableOpacity onPress={onPress}>
@@ -368,6 +385,31 @@ const ProfileImage = ({ photoUrl, onPress }) => {
               : Resources.icons.ic_placeholder
           }
         />
+        {isAccountPremium  && (
+            <View
+            style={{
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              height: 20,
+              width: 20,
+              justifyContent: "center",
+              borderRadius: 100,
+              backgroundColor: Resources.colors.royalBlue,
+            }}
+          >
+            <Image
+              style={{
+                height: 12,
+                width: 12,
+                resizeMode: "center",
+                alignSelf: "center",
+                tintColor: Resources.colors.white,
+              }}
+              source={Resources.icons.ic_diamond_premium}
+            />
+          </View> 
+          )}
       </TouchableOpacity>
     </View>
   );
@@ -417,6 +459,7 @@ const GridCategories = ({ categories, onClick }) => {
   const [displayName, setDisplayName] = useState(null)
   const [userPhoto, setUserPhoto] = useState(null)
   const [categories, setCategories] = useState(null)
+  const [isAccountPremium, setIsAccountPremium] = useState(null)
   const onClickSignIn = React.useCallback(() => {
     navigation.navigate("Login");
   }, []);
@@ -510,11 +553,17 @@ const GridCategories = ({ categories, onClick }) => {
     navigation.navigate("ServicesScreen", {name: item.name, image: item.image})
   }, [])
 
+  const onClickSearch = React.useCallback(() => {
+    navigation.navigate("SearchServices")
+  }, [])
+
   useEffect(() => {
     console.log(`User data is ${user}`)
     if (user) {
       setDisplayName(user.firstName + " " + user.lastName)
       setUserPhoto(user.photoUrl)
+      setIsAccountPremium(user.isAccountPremium);
+
     }
   }, [user]);
   if (Platform.OS === "web") {
@@ -527,8 +576,15 @@ const GridCategories = ({ categories, onClick }) => {
         onClickSignUp={onClickSignUp}
         onClickNewNotif={onClickNewNotif}
         onClickCategory={onClickCategory}
+        onClickSearch={onClickSearch}
+        isAccountPremium={isAccountPremium}
         onClickPremiumAccount={() => {
-          navigateToScreen("PremiumAccount");
+          if(isAccountPremium){
+          navigation.navigate("CancelPremiumScreen", {userId : user?.uid});
+            
+            return;
+          }
+          navigation.navigate("PremiumAccount", {userId: user?.uid, name: displayName});
         }}
         onClickSettings={() => {
           navigateToScreen("Settings");
@@ -544,10 +600,12 @@ const GridCategories = ({ categories, onClick }) => {
 
   return (
     < MobileComponent
+    onClickSearch={onClickSearch}
     categories={categories}
       user={currentUser}
       displayName={displayName}
       userPhoto={userPhoto}
+      isAccountPremium={isAccountPremium}
       onClickCategory={onClickCategory}
       navigateNotification={() => {
         navigateToScreen("Notification");

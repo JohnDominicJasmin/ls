@@ -11,7 +11,7 @@ import {
 import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
-import SignUpInputField from "./components/SignUpInputField";
+import InputField from "./components/SignUpInputField";
 import React from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -255,7 +255,7 @@ function SignUpScreen() {
                   gap: 8,
                 }}
               >
-                <SignUpInputField
+                <InputField
                   returnKeyType={"next"}
                   keyboardType={"default"}
                   placeholder={"First name"}
@@ -263,7 +263,7 @@ function SignUpScreen() {
                   setValue={updateFirstName}
                   errorMessage={firstNameError}
                 />
-                <SignUpInputField
+                <InputField
                   keyboardType={"default"}
                   returnKeyType={"next"}
                   placeholder={"Last name"}
@@ -271,7 +271,7 @@ function SignUpScreen() {
                   setValue={updateLastName}
                   errorMessage={lastNameError}
                 />
-                <SignUpInputField
+                <InputField
                   returnKeyType={"next"}
                   keyboardType={"email-address"}
                   placeholder={"Email"}
@@ -279,7 +279,7 @@ function SignUpScreen() {
                   setValue={updateEmail}
                   errorMessage={emailError}
                 />
-                <SignUpInputField
+                <InputField
                   returnKeyType={"next"}
                   keyboardType={"password"}
                   placeholder={"Password"}
@@ -287,7 +287,7 @@ function SignUpScreen() {
                   setValue={updatePassword}
                   errorMessage={passwordError}
                 />
-                <SignUpInputField
+                <InputField
                   returnKeyType={"done"}
                   keyboardType={"password"}
                   placeholder={"Confirm Password"}

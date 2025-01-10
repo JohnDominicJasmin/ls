@@ -20,6 +20,7 @@ import { ContactDetail } from "./BookServiceScreen";
 import WorkerDetails from "../../ui/WorkerDetails";
 import {
   cancelBooking,
+  markAsPaid,
   markAsRated,
   useActiveUserBookings,
   useDoneUserBookings,
@@ -29,6 +30,7 @@ import { rateService } from "../../utils/servicesDb";
 
 import { Button, Dialog, CheckBox, ListItem, Avatar } from "@rneui/themed";
 import RatingStars from "../../ui/RatingStars";
+import { incrementUserPoint } from "../../utils/userDb";
 const ACTIVE = "Active";
 const DONE = "Done";
 
@@ -56,11 +58,12 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
     />
   </View>
 );
-const RateAndPaidSection = ({ onClickRate, onClickPaid }) => {
+const RateAndPaidSection = ({ isRated, onClickRate, onClickPaid }) => {
   return (
     <>
       <View style={{ flexDirection: "row", gap: 8, marginVertical: 12 }}>
         <TouchableOpacity
+          disabled={isRated}
           onPress={onClickRate}
           style={{
             flex: 1,
@@ -70,7 +73,9 @@ const RateAndPaidSection = ({ onClickRate, onClickPaid }) => {
             style={{
               flexDirection: "row",
               borderWidth: 1,
-              borderColor: Resources.colors.royalBlue,
+              borderColor: isRated
+                ? Resources.colors.alto
+                : Resources.colors.royalBlue,
               justifyContent: "center",
               borderRadius: 8,
               gap: 8,
@@ -82,11 +87,21 @@ const RateAndPaidSection = ({ onClickRate, onClickPaid }) => {
               style={{
                 height: 20,
                 width: 20,
-                tintColor: Resources.colors.royalBlue,
+                tintColor: isRated
+                  ? Resources.colors.alto
+                  : Resources.colors.royalBlue,
               }}
               source={Resources.icons.ic_star}
             />
-            <Text style={{ color: Resources.colors.royalBlue }}>{"Rate"}</Text>
+            <Text
+              style={{
+                color: isRated
+                  ? Resources.colors.alto
+                  : Resources.colors.royalBlue,
+              }}
+            >
+              {"Rate"}
+            </Text>
           </View>
         </TouchableOpacity>
 
@@ -209,6 +224,7 @@ function ServiceItem({
 
   onClickRate,
   onClickPaid,
+  isRated,
 }) {
   return (
     <View style={styles.serviceItem}>
@@ -221,7 +237,11 @@ function ServiceItem({
       >
         <Image
           source={{ uri: photoUrl }}
-          style={{ height: 100, width: "40%", resizeMode: "cover" }}
+          style={{
+            height: Platform.OS === "web" ? 200 : 100,
+            width: "40%",
+            resizeMode: "cover",
+          }}
         />
 
         <View
@@ -291,6 +311,7 @@ function ServiceItem({
               {isActive && !isDone && (
                 <>
                   <RateAndPaidSection
+                    isRated={isRated}
                     onClickPaid={onClickPaid}
                     onClickRate={onClickRate}
                   />
@@ -326,9 +347,13 @@ function ServiceItem({
           paddingTop: 12,
         }}
       >
-        <TouchableOpacity onPress={onClickCancel}>
-          <Text>{"Cancel"}</Text>
-        </TouchableOpacity>
+        <View>
+          {!isDone && isActive && (
+            <TouchableOpacity onPress={onClickCancel}>
+              <Text>{"Cancel"}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         <TouchableOpacity onPress={onExpand}>
           {isExpanded ? (
@@ -396,6 +421,7 @@ function MobileContent({
         isExpanded={itemExpanded == item.id}
         onClickPaid={() => onClickPaid(item.id)}
         onClickRate={() => onClickRate(item)}
+        isRated={item.isRated}
       />
     );
   };
@@ -431,7 +457,16 @@ function MobileContent({
   );
 }
 
-function WebComponent() {}
+function WebComponent({
+  indicatorActive,
+  selectIndicator,
+  doneBookings,
+  bookings,
+  cancelBooking,
+
+  onClickRate,
+  onClickPaid,
+}) {}
 
 function BookingsScreen() {
   const [user, setUser] = useState(null);
@@ -515,16 +550,13 @@ function BookingsScreen() {
     await rateService(
       data,
       () => {
-
         markAsRated(
           ratingItem.id,
           () => {
-              console.log('Rated successfully')
-
+            console.log("Rated successfully");
           },
           () => {
-            console.log('Rated failed')
-            
+            console.log("Rated failed");
           }
         );
       },
@@ -532,7 +564,29 @@ function BookingsScreen() {
     );
   }, [ratingItem, ratingComment, rating, ratingItem]);
 
-  const onClickPaid = React.useCallback((id) => {}, []);
+  const onClickPaid = React.useCallback(
+    async (id) => {
+      await markAsPaid(
+        id,
+        () => {
+          incrementUserPoint(
+            user?.uid,
+            1,
+            () => {
+              console.log(`Paid successfully`);
+            },
+            () => {
+              console.log(`Paid failed`);
+            }
+          );
+        },
+        () => {
+          console.log(`Paid failed`);
+        }
+      );
+    },
+    [user?.uid]
+  );
 
   return (
     <>
@@ -591,19 +645,15 @@ function BookingsScreen() {
           />
         ) : (
           <>
-            {Platform.OS === "web" ? (
-              <WebComponent />
-            ) : (
-              <MobileContent
-                bookings={userBookings}
-                doneBookings={doneBookings}
-                selectIndicator={setSelectedIndicator}
-                indicatorActive={selectedIndicator}
-                cancelBooking={onClickCancelBooking}
-                onClickPaid={onClickPaid}
-                onClickRate={onClickRate}
-              />
-            )}
+            <MobileContent
+              bookings={userBookings}
+              doneBookings={doneBookings}
+              selectIndicator={setSelectedIndicator}
+              indicatorActive={selectedIndicator}
+              cancelBooking={onClickCancelBooking}
+              onClickPaid={onClickPaid}
+              onClickRate={onClickRate}
+            />
           </>
         )}
       </View>
@@ -614,6 +664,10 @@ function BookingsScreen() {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
+    flex: 1,
+    height: "100%",
+    width: Platform.OS === "web" ? "70%" : "100%",
+    alignSelf: "center",
     backgroundColor: Resources.colors.white,
   },
   guestContainer: {

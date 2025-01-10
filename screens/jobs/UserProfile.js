@@ -13,7 +13,7 @@ import React, { useEffect, useState } from "react";
 
 import TopAppBar from "../auth/components/TopAppBar";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Install react-native-vector-icons
-import SignUpInputField from "./../auth/components/SignUpInputField";
+import InputField from "./../auth/components/SignUpInputField";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Resources from "../../src/Resources";
 // import { getUserDataMobile, updateUserFieldsMobile } from "../../utils/userDb";
@@ -106,7 +106,7 @@ function ProfileInputs({
         marginBottom: 24,
       }}
     >
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"First name"}
@@ -115,7 +115,7 @@ function ProfileInputs({
         errorMessage={firstNameError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"Last name"}
@@ -124,7 +124,7 @@ function ProfileInputs({
         errorMessage={lastNameError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"phone-pad"}
         placeholder={"Phone Number"}
@@ -133,7 +133,7 @@ function ProfileInputs({
         errorMessage={phoneNumberError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"Address"}
@@ -142,7 +142,7 @@ function ProfileInputs({
         errorMessage={addressError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"Barangay"}
@@ -151,7 +151,7 @@ function ProfileInputs({
         errorMessage={barangayError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"City"}
@@ -160,7 +160,7 @@ function ProfileInputs({
         errorMessage={cityError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"Province"}

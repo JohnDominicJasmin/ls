@@ -10,11 +10,11 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import SignUpInputField from "./components/SignUpInputField";
+import InputField from "./components/SignUpInputField";
 import TopAppBar from "./components/TopAppBar";
 import Resources from "../../src/Resources";
 import changePasswordUser from "../../utils/changePassword";
-import Spinner from "react-native-loading-spinner-overlay"; 
+import Spinner from "react-native-loading-spinner-overlay";
 
 function MobileComponent({
   currentPassword,
@@ -42,7 +42,7 @@ function MobileComponent({
         <TopAppBar title="Change Password" />
 
         <View style={{ flex: 1, marginTop: 50, paddingHorizontal: 16 }}>
-          <SignUpInputField
+          <InputField
             returnKeyType={"next"}
             keyboardType={"password"}
             placeholder={"Current Password"}
@@ -51,7 +51,7 @@ function MobileComponent({
             errorMessage={currentPasswordError}
           />
 
-          <SignUpInputField
+          <InputField
             returnKeyType={"next"}
             keyboardType={"password"}
             placeholder={"New Password"}
@@ -60,7 +60,7 @@ function MobileComponent({
             errorMessage={newPasswordError}
           />
 
-          <SignUpInputField
+          <InputField
             returnKeyType={"next"}
             keyboardType={"password"}
             placeholder={"Confirm Password"}

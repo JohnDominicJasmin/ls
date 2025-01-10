@@ -16,6 +16,9 @@ const Resources = {
 
     },
     icons: {
+        ic_image_icon: require('../assets/icons/ic_image_icon.png'),
+        ic_upload: require('../assets/icons/ic_upload.png'),
+        ic_discount_and_voucher: require('../assets/icons/ic_discount_and_voucher.png'),
         ic_telephone: require('../assets/icons/ic_telephone.png'),
         ic_eye_close: require('../assets/icons/ic_eyes_close.png') ,
         ic_eye_open: require('../assets/icons/ic_eyes_open.png') ,
@@ -38,13 +41,14 @@ const Resources = {
         ic_star: require('../assets/icons/ic_star.png')
     },
     images: {
+        ic_gcash_qr: require('../assets/images/gcash_qr.png'),
         ic_banner: require('../assets/images/ic_banner.png'),
         ic_check_email: require('../assets/images/ic_check_email.png'),
         ic_home_page_banner: require('../assets/images/home_page_poster.png'),
         ic_home_page_banner_web: require('../assets/images/ic_home_page_banner_web.png'),
         ic_forgot_password: require('../assets/images/ic_forgot_password.png'),
         ic_premium: require('../assets/images/ic_premium.png'),
-        
+        ic_cancel_premium: require('../assets/images/ic_cancel_premium.png')
    
     },
     mockIcons : {

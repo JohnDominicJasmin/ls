@@ -142,23 +142,60 @@ const calculateAverageRating = (ratings) => {
       }
   
       onSuccess();
-      console.log("User data created successfully!");
+      console.log("Rating data created successfully!");
     } catch (error) {
-      console.error("Error creating user data:", error);
+      console.error("Error creating ratings data:", error);
       onFailure(error);
     }
   }
 
 
 
+  const getAllServicesMobile = async () => {
+    try {
+      const snapshot = await firestore().collection('services').get();
+      const services = snapshot.docs.map(doc => ({
+        id: doc.id, // Include the document ID
+        ...doc.data(), // Include the document data
+      }));
+  
+      console.log('Services', services);
+      return services;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+  
+
+  const getAllServicesWeb = async () => {
+    try {
+      const db = getFirestore();
+      const querySnapshot = await getDocs(collection(db, 'services'));
+      const services = querySnapshot.docs.map(doc => ({
+        id: doc.id, // Include the document ID
+        ...doc.data(), // Include the document data
+      }));
+  
+      console.log('Services:', services);
+      return services;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+    }
+  };
+
+
+  const getAllServices = () => {
+    if (Platform.OS === 'web') {
+      return getAllServicesWeb();
+    } else {
+      return getAllServicesMobile();
+    }
+  };
+
+
+  
 
 
 
 
-
-
-
-
-
-
-export {getServiceByType, getRatingsByServiceType, rateService};
+export {getServiceByType, getRatingsByServiceType, rateService, getAllServices};

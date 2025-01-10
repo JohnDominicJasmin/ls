@@ -1,12 +1,16 @@
 import React from 'react';
-import { TextInput, View, StyleSheet, Image, Platform } from 'react-native';
+import { TextInput, View, StyleSheet, Image, Platform, Pressable } from 'react-native';
 import Resources from '../../../src/Resources';
 
-const SearchBar = ({styleContainer}) => {
+const SearchBar = ({styleContainer, onPress, isEditable = true, onSearch, searchInput }) => {
   return (
-    <View style={[styles.container, styleContainer]}>
+    <Pressable onPress={onPress}>
+      <View style={[styles.container, styleContainer]}>
       <TextInput
+      editable={isEditable}
         style={styles.input}
+        value={searchInput}
+        onChangeText={onSearch}
         placeholder="Search service here"
         placeholderTextColor={Resources.colors.silver}
       />
@@ -17,6 +21,7 @@ const SearchBar = ({styleContainer}) => {
         style={styles.icon}
       />
     </View>
+    </Pressable>
   );
 };
 

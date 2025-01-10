@@ -4,7 +4,7 @@ import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
 import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
-import { useNavigation,CommonActions } from "@react-navigation/native";
+import { useNavigation, CommonActions } from "@react-navigation/native";
 import CreateAnAccountSection from "../auth/components/CreateAnAccountSection";
 import ProfileItem from "../auth/components/ProfileItem";
 import logout from "../../utils/signOut";
@@ -40,7 +40,7 @@ const ProfileScreenContent = ({
   isAccountPremium,
   onClickPremiumAccount,
   onClickSettings,
-  onClickLogout
+  onClickLogout,
 }) => {
   return (
     <View
@@ -59,14 +59,42 @@ const ProfileScreenContent = ({
           gap: 8,
         }}
       >
-        <Image
-          source={imageSource}
-          style={{
-            height: 90,
-            width: 90,
-            borderRadius: 100,
-          }}
-        />
+        <View>
+          <Image
+            source={imageSource}
+            style={{
+              height: 90,
+              width: 90,
+              borderRadius: 100,
+            }}
+          />
+
+          {isAccountPremium && (
+            <View
+              style={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                height: 24,
+                width: 24,
+                justifyContent: "center",
+                borderRadius: 100,
+                backgroundColor: Resources.colors.royalBlue,
+              }}
+            >
+              <Image
+                style={{
+                  height: 16,
+                  width: 16,
+                  resizeMode: "center",
+                  alignSelf: "center",
+                  tintColor: Resources.colors.white,
+                }}
+                source={Resources.icons.ic_diamond_premium}
+              />
+            </View> 
+          )}
+        </View>
 
         <Text
           style={{
@@ -151,11 +179,19 @@ const ProfileScreenContent = ({
           buttonText={"Premium Account"}
           buttonOnPress={onClickPremiumAccount}
         />
+
         <ProfileItem
           iconSource={Resources.icons.ic_setting}
           buttonText={"Settings"}
           buttonOnPress={onClickSettings}
         />
+        {isAccountPremium && (
+          <ProfileItem
+            iconSource={Resources.icons.ic_discount_and_voucher}
+            buttonText={"Discounts and Vouchers"}
+            buttonOnPress={onClickPremiumAccount}
+          />
+        )}
         <ProfileItem
           iconSource={Resources.icons.ic_logout}
           buttonText={"Logout"}
@@ -169,17 +205,11 @@ const ProfileScreenContent = ({
 function ProfileScreen() {
   const [currentUser, setUser] = useState(null);
   const navigation = useNavigation();
- const [displayName, setDisplayName] = useState(null)
- const [isAccountPremium, setIsAccountPremium] = useState(false)
- const [fullAddress, setFullAddress] = useState(null);
-  const [userPhoto, setUserPhoto] = useState(null)
-  const mockData = {
-    photoUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9FKvV2vt3otTUnhnrrCKP-hYKKsRuFLTSsZ6f5buBye7-x7hbDkqlhgQygXSYrJAZo5I",
-    name: "John Doe",
-    address: "123 Main St, City, Country",
-    isFree: true,
-  };
+  const [displayName, setDisplayName] = useState(null);
+  const [isAccountPremium, setIsAccountPremium] = useState(false);
+  const [fullAddress, setFullAddress] = useState(null);
+  const [userPhoto, setUserPhoto] = useState(null);
+
   useEffect(() => {
     const fetchUser = async () => {
       let firebaseUser =
@@ -196,58 +226,61 @@ function ProfileScreen() {
 
   const onClickCreateAccount = React.useCallback(() => {
     navigation.navigate("SignUp");
-  },[] );
+  }, []);
 
   const onClickLogin = React.useCallback(() => {
     navigation.navigate("Login");
   }, []);
 
   const onClickPremiumAccount = React.useCallback(() => {
-    navigation.navigate("PremiumAccount")
-  }, [])
+    if(isAccountPremium){
+      navigation.navigate("CancelPremiumScreen", {userId: currentUser?.uid})
+      return; 
+    }
+    navigation.navigate("PremiumAccount", {
+      userId: currentUser?.uid,
+      name: displayName,
+    });
+  }, [currentUser?.uid, displayName, isAccountPremium]);
 
   const onClickSettings = React.useCallback(() => {
-    navigation.navigate("Settings")
-    
-  }, [])
-  
-    const { user, error } = getUserData(currentUser?.uid);
-  
-    useEffect(() => {
-      console.log(`User data is ${user}`)
-      if (user) {
-        setDisplayName(user.firstName + " " + user.lastName)
-        setUserPhoto(user.photoUrl)
-        setIsAccountPremium(user.setIsAccountPremium)
-        const fullAddress = user.address + ", " + user.barangay + ", " + user.city
-        setFullAddress(fullAddress)
-      }
-    }, [user]);
+    navigation.navigate("Settings");
+  }, []);
+
+  const { user, error } = getUserData(currentUser?.uid);
+
+  useEffect(() => {
+    console.log(`User data is ${JSON.stringify(user)}`);
+    if (user) {
+      setDisplayName(user.firstName + " " + user.lastName);
+      setUserPhoto(user.photoUrl);
+      setIsAccountPremium(user.isAccountPremium);
+      const fullAddress =
+        user.address + ", " + user.barangay + ", " + user.city;
+      setFullAddress(fullAddress);
+    }
+  }, [user]);
 
   const handleSuccess = () => {
-    const onDialogDismiss  = () => {
-        navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [
-                { name: 'Login' }, // The screen you want to navigate to
-              ],
-            })
-          )
-    }
-    Alert.alert(
-        "Success",
-        "Logged out successfully",
-        [{ text: "OK", onPress: onDialogDismiss }]
+    const onDialogDismiss = () => {
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { name: "Login" }, // The screen you want to navigate to
+          ],
+        })
       );
-      
-    
+    };
+    Alert.alert("Success", "Logged out successfully", [
+      { text: "OK", onPress: onDialogDismiss },
+    ]);
   };
-  
+
   const handleFailure = (error) => {
     Alert.alert("Error", `Failed to log out: ${error.message}`);
   };
-  
+
   return (
     <>
       <View style={styles.container}>
@@ -272,7 +305,7 @@ function ProfileScreen() {
             onClickPremiumAccount={onClickPremiumAccount}
             onClickSettings={onClickSettings}
             onClickLogout={() => {
-                logout(handleSuccess, handleFailure)
+              logout(handleSuccess, handleFailure);
             }}
           />
         )}
@@ -292,8 +325,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 5,
     flex: 1,
-    justifyContent: 'center',
-    verticalAlign:'middle',
+    justifyContent: "center",
+    verticalAlign: "middle",
 
     flexDirection: "column",
     gap: 40,

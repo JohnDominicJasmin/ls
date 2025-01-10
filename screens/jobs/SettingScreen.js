@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
 import { ProfilePictureUI } from "../jobs/UserProfile";
-import SignUpInputField from "../auth/components/SignUpInputField";
+import InputField from "../auth/components/SignUpInputField";
 import Spinner from "react-native-loading-spinner-overlay";
 import * as ImagePicker from "expo-image-picker";
 import changePasswordUser from "../../utils/changePassword";
@@ -66,7 +66,7 @@ function ChangePassword({
 }) {
   return (
     <View style={{ flex: 1, marginTop: 50, paddingHorizontal: 16, gap: 18 }}>
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"password"}
         placeholder={"Current Password"}
@@ -75,7 +75,7 @@ function ChangePassword({
         errorMessage={currentPasswordError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"password"}
         placeholder={"New Password"}
@@ -84,7 +84,7 @@ function ChangePassword({
         errorMessage={newPasswordError}
       />
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"password"}
         placeholder={"Confirm Password"}
@@ -174,7 +174,7 @@ function UserProfile({
           gap: 16,
         }}
       >
-        <SignUpInputField
+        <InputField
           returnKeyType={"next"}
           keyboardType={"default"}
           placeholder={"First name"}
@@ -183,7 +183,7 @@ function UserProfile({
           errorMessage={firstNameError}
           style={{ width: "auto", flex: 1 }}
         />
-        <SignUpInputField
+        <InputField
           returnKeyType={"next"}
           keyboardType={"default"}
           placeholder={"Last name"}
@@ -201,7 +201,7 @@ function UserProfile({
           gap: 16,
         }}
       >
-        <SignUpInputField
+        <InputField
           returnKeyType={"next"}
           keyboardType={"phone-pad"}
           placeholder={"Phone Number"}
@@ -210,7 +210,7 @@ function UserProfile({
           errorMessage={phoneNumberError}
           style={{ width: "auto", flex: 1 }}
         />
-        <SignUpInputField
+        <InputField
           returnKeyType={"next"}
           keyboardType={"default"}
           placeholder={"Address"}
@@ -228,7 +228,7 @@ function UserProfile({
           gap: 16,
         }}
       >
-        <SignUpInputField
+        <InputField
           returnKeyType={"next"}
           keyboardType={"default"}
           placeholder={"Barangay"}
@@ -237,7 +237,7 @@ function UserProfile({
           errorMessage={barangayError}
           style={{ width: "auto", flex: 1 }}
         />
-        <SignUpInputField
+        <InputField
           returnKeyType={"next"}
           keyboardType={"default"}
           placeholder={"City"}
@@ -248,7 +248,7 @@ function UserProfile({
         />
       </View>
 
-      <SignUpInputField
+      <InputField
         returnKeyType={"next"}
         keyboardType={"default"}
         placeholder={"Province"}

@@ -16,9 +16,13 @@ import PremiumAccountScreen from '../screens/jobs/PremiumAccountScreen';
 import SettingScreen from '../screens/jobs/SettingScreen';
 import {UserProfile} from '../screens/jobs/UserProfile';
 import ChangePassword from '../screens/auth/ChangePassword';
-import ServiceScreen from '../screens/jobs/Service';
+import {ServiceScreen} from '../screens/jobs/Service';
 import {BookServiceScreen} from '../screens/jobs/BookServiceScreen';
 import BookingsScreen from '../screens/jobs/BookingsScreen';
+import SearchServices from '../screens/jobs/SearchServices';
+import {PaymentPremium} from '../screens/jobs/PaymentPremium';
+import ProfileScreen from '../screens/jobs/ProfileScreen';
+import CancelPremiumScreen from '../screens/jobs/CancelPremiumScreen';
 
 const Stack = createStackNavigator();
 
@@ -88,11 +92,12 @@ const AuthenticationStackScreen = () => {
         
         <Stack.Screen name="BookService" component={BookServiceScreen} options={{headerShown: false}} />
         <Stack.Screen name="Bookings" component={BookingsScreen}options={{ headerShown: false }} />
-
-
+        <Stack.Screen name="SearchServices" component={SearchServices} options={{ headerShown: false }}/>
+        <Stack.Screen name="PaymentPremium" component={PaymentPremium} options={ {headerShown: false}}/>
         <Stack.Screen name="PremiumAccount" component={PremiumAccountScreen}  options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={SettingScreen}  options={{ headerShown: false }} />
-
+      <Stack.Screen name="Profile" component={ProfileScreen}options={{ headerShown: false }} />
+        <Stack.Screen name="CancelPremiumScreen" component={CancelPremiumScreen} options={{ headerShown: false }} /> 
        <Stack.Screen name="ServicesScreen" component={ServiceScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Notification" component={NotificationScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false }}/>

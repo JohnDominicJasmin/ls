@@ -310,11 +310,53 @@ const markAsRatedMobile = async (bookingId) => {
     }
   };
 
+  
+  const markAsPaidMobile = async (bookingId) => {
+    await firestore()
+      .collection("appointments")
+      .doc(bookingId)
+      .update({ isPaid: true, isDone: true, isActive: false }); // Single object with both fields
+  };
+  
+  
+  
+  
+  const markAsPaidWeb = async (bookingId) => {
+    const firestore = getFirestore(); // Initialize Firestore
+    const bookingRef = doc(firestore, "appointments", bookingId);
+    await updateDoc(bookingRef, { isPaid: true, isDone: true, isActive: false}); // Single object with both fields
+  };
+  
+  
+  // Unified cancel booking function
+  const markAsPaid = async (bookingId, onSuccess, onFailure) => {
+    try {
+      if (Platform.OS === "web") {
+        await markAsPaidWeb(bookingId);
+      } else {
+        await markAsPaidMobile(bookingId);
+      }
+  
+      // Call the onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess(`Paid successful for booking ID: ${bookingId}`);
+      }
+    } catch (error) {
+      console.error("Error paid booking:", error);
+  
+      // Call the onFailure callback if provided
+      if (onFailure) {
+        onFailure(error);
+      }
+    }
+  };
+
 export {
   createBookingService,
   isDiscountCodeExist,
   useActiveUserBookings ,
   cancelBooking,
   useDoneUserBookings,
-  markAsRated
+  markAsRated,
+  markAsPaid
 };

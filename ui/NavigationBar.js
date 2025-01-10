@@ -12,6 +12,8 @@ const NavigationBar = ({
   onClickSignIn,
   onClickSignUp,
   onClickBookings,
+  onClickSearch,
+  isAccountPremium
 }) => {
   return (
     <View
@@ -47,10 +49,11 @@ const NavigationBar = ({
         </TouchableOpacity>
       </View>
 
-      <SearchBar styleContainer={{ marginTop: 16, width: 400 }} />
+      <SearchBar isEditable={false} styleContainer={{ marginTop: 16, width: 400 }} onPress={onClickSearch} />
 
       {user && !user?.isAnonymous && (
         <ProfileImage
+        isAccountPremium={isAccountPremium}
           user={user}
           photoUrl={userPhoto}
           onPress={onClickProfileSelection}

@@ -247,7 +247,7 @@ function WebComponent({
   );
 }
 
-export default function ServiceScreen({ route }) {
+ function ServiceScreen({ route }) {
   const navigation = useNavigation();
   const { name, image } = route.params;
   const [services, setServices] = useState([]);
@@ -429,3 +429,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+
+export { ServiceScreen, ServiceItem }

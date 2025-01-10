@@ -1,58 +1,74 @@
-import {  View, Text, StyleSheet, TextInput} from "react-native";
+import { View, Text, StyleSheet, TextInput } from "react-native";
 import Resources from "../../../src/Resources";
 
-function SignUpInputField({ style, value, setValue, placeholder, keyboardType,returnKeyType, errorMessage }) {
-    return (
-        <View
-        
-         style={[ {
-            width: "100%",
-            alignSelf: "center",
-         }, style]}>
+function InputField({
+  style,
+  value,
+  setValue,
+  placeholder,
+  keyboardType,
+  returnKeyType,
+  errorMessage,
+}) {
+  return (
+    <View
+      style={[
+        {
+          width: "100%",
+          alignSelf: "center",
+        },
+        style,
+      ]}
+    >
+      <Text
+        style={{
+          fontSize: 14,
+          marginBottom: 8, // Adds spacing below the label
+        }}
+      >
+        {placeholder}
+      </Text>
 
-            <Text style={{
-                fontSize: 14
-            }}>
-                {placeholder}
-            </Text>
+      <TextInput
+        value={value}
+        onChangeText={setValue}
+        style={styles.input}
+        keyboardType={keyboardType}
+        returnKeyType={returnKeyType}
+        secureTextEntry={keyboardType === "password"}
+        theme={{
+          colors: {
+            primary: Resources.colors.alto,
+            text: "#000",
+            placeholder: "#aaa",
+          },
+        }}
+      />
 
-            <TextInput
-                value={value}
-                onChangeText={setValue}
-                style={styles.input}
-                keyboardType={keyboardType}
-                returnKeyType={returnKeyType}
-                secureTextEntry={keyboardType === "password"}
-                theme={{
-                    colors: {
-                        primary: Resources.colors.alto,
-                        text: "#000",
-                        placeholder: "#aaa",
-                    },
-                }}
-            />
-
-            <Text style={{
-                color: Resources.colors.red,
-                fontSize: 12,
-            }}>
-                {errorMessage}
-            </Text>
-        </View>
-    )
-}   
+      {errorMessage && (
+        <Text
+          style={{
+            color: Resources.colors.red,
+            fontSize: 12,
+            marginTop: 4, // Adds spacing above the error message
+          }}
+        >
+          {errorMessage}
+        </Text>
+      )}
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
-    input: {
-        marginHorizontal: 12,
-        marginTop: 8,
-        borderRadius: 12,   
-        width: "100%",
-        alignSelf: "center",
-        padding: 8,
-        borderWidth: 1,
-        borderColor: Resources.colors.alto,
-    },
+  input: {
+    flex: 1, // Ensures the input stretches to fill the parent container
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Resources.colors.alto,
+    backgroundColor: "#fff", // Optional: Adds a white background
+  },
 });
 
-export default SignUpInputField;
+export default InputField;
