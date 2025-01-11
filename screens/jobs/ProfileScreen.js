@@ -39,6 +39,7 @@ const ProfileScreenContent = ({
   address,
   isAccountPremium,
   onClickPremiumAccount,
+  onClickDiscountsAndVouchers,
   onClickSettings,
   onClickLogout,
 }) => {
@@ -189,7 +190,7 @@ const ProfileScreenContent = ({
           <ProfileItem
             iconSource={Resources.icons.ic_discount_and_voucher}
             buttonText={"Discounts and Vouchers"}
-            buttonOnPress={onClickPremiumAccount}
+            buttonOnPress={onClickDiscountsAndVouchers}
           />
         )}
         <ProfileItem
@@ -261,6 +262,9 @@ function ProfileScreen() {
     }
   }, [user]);
 
+  const onClickDiscountsAndVouchers = React.useCallback(() => {
+    navigation.navigate("VouchersScreen", {userId: currentUser?.uid})
+  },[currentUser?.uid]);
   const handleSuccess = () => {
     const onDialogDismiss = () => {
       navigation.dispatch(
@@ -302,6 +306,7 @@ function ProfileScreen() {
             name={displayName}
             address={fullAddress}
             isAccountPremium={isAccountPremium}
+            onClickDiscountsAndVouchers={onClickDiscountsAndVouchers}
             onClickPremiumAccount={onClickPremiumAccount}
             onClickSettings={onClickSettings}
             onClickLogout={() => {

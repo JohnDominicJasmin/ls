@@ -23,6 +23,7 @@ import SearchServices from '../screens/jobs/SearchServices';
 import {PaymentPremium} from '../screens/jobs/PaymentPremium';
 import ProfileScreen from '../screens/jobs/ProfileScreen';
 import CancelPremiumScreen from '../screens/jobs/CancelPremiumScreen';
+import VouchersScreen from '../screens/jobs/VouchersScreen';
 
 const Stack = createStackNavigator();
 
@@ -103,6 +104,7 @@ const AuthenticationStackScreen = () => {
         <Stack.Screen name="UserProfile" component={UserProfile} options={{ headerShown: false }}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }}/>
         <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ headerShown: false }}/>
+        <Stack.Screen name="VouchersScreen" component={VouchersScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </>
   );

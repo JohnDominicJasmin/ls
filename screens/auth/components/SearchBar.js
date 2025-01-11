@@ -1,10 +1,10 @@
 import React from 'react';
-import { TextInput, View, StyleSheet, Image, Platform, Pressable } from 'react-native';
+import { TextInput, View, StyleSheet, Image, Platform, Pressable, TouchableOpacity } from 'react-native';
 import Resources from '../../../src/Resources';
 
 const SearchBar = ({styleContainer, onPress, isEditable = true, onSearch, searchInput }) => {
   return (
-    <Pressable onPress={onPress}>
+    <TouchableOpacity onPress={onPress}>
       <View style={[styles.container, styleContainer]}>
       <TextInput
       editable={isEditable}
@@ -21,7 +21,7 @@ const SearchBar = ({styleContainer, onPress, isEditable = true, onSearch, search
         style={styles.icon}
       />
     </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 

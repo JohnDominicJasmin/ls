@@ -33,6 +33,7 @@ import { getUserData } from "../../utils/userDb";
 import NavigationBar from "../../ui/NavigationBar";
 const { width, height } = Dimensions.get("window");
 import { getCategories } from "../../utils/userDb";
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 function WebComponent({
   user: user,
@@ -41,6 +42,7 @@ function WebComponent({
   onClickNewNotif,
   onClickPremiumAccount,
   onClickSettings,
+  onClickDiscountAndVoucher,
   onClickLogout,
   userPhoto,
   displayName,
@@ -48,8 +50,7 @@ function WebComponent({
   onClickBookings,
   categories,
   isAccountPremium,
-  onClickSearch
-  
+  onClickSearch,
 }) {
   const data = mockData();
   const [shouldShowNotification, setShouldShowNotification] = useState(false);
@@ -62,17 +63,18 @@ function WebComponent({
   const onClickProfileSelection = React.useCallback(() => {
     setShouldShowProfileSelections((prev) => !prev);
   }, []);
-  
 
   const renderItem = ({ item, index }) => {
     return (
-      <TouchableOpacity onPress={() => {
-        onClickCategory(item, index)
-        console.log(item)
-      }}>
+      <TouchableOpacity
+        onPress={() => {
+          onClickCategory(item, index);
+          console.log(item);
+        }}
+      >
         <View style={styles.gridItem}>
           <View style={styles.gridCircle}>
-            <Image style={styles.gridIcon} source={{uri: item.icon}} />
+            <Image style={styles.gridIcon} source={{ uri: item.icon }} />
           </View>
           <Text style={styles.itemText}>{item.name}</Text>
         </View>
@@ -247,6 +249,16 @@ function WebComponent({
               onClickSettings();
             }}
           />
+          {isAccountPremium && (
+            <ProfileItem
+              iconSource={Resources.icons.ic_discount_and_voucher}
+              buttonText={"Discounts and Vouchers"}
+              buttonOnPress={() => {
+                onClickProfileSelection();
+                onClickDiscountAndVoucher();
+              }}
+            />
+          )}
           <ProfileItem
             iconSource={Resources.icons.ic_logout}
             buttonText={"Logout"}
@@ -261,14 +273,29 @@ function WebComponent({
   );
 }
 
-function MobileComponent({ user, displayName, userPhoto, navigateNotification, onClickCategory, categories, onClickSearch, isAccountPremium }) {
-  
+function MobileComponent({
+  user,
+  displayName,
+  userPhoto,
+  navigateNotification,
+  onClickCategory,
+  categories,
+  onClickSearch,
+  isAccountPremium,
+}) {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <SafeAreaView>
+      <BannerAd
+      unitId={TestIds.BANNER} // Replace with your AdMob unit ID for production
+      size={BannerAdSize.FULL_BANNER}
+      requestOptions={{
+        requestNonPersonalizedAdsOnly: true,
+      }}
+    />
         <View
           style={{
             height: "100%",
@@ -286,10 +313,20 @@ function MobileComponent({ user, displayName, userPhoto, navigateNotification, o
                     flex: 1,
                   }}
                 >
-                  {user && !user?.isAnonymous && <ProfileImage user={user} photoUrl={userPhoto} isAccountPremium={isAccountPremium}/>}
+                  {user && !user?.isAnonymous && (
+                    <ProfileImage
+                      user={user}
+                      photoUrl={userPhoto}
+                      isAccountPremium={isAccountPremium}
+                    />
+                  )}
 
                   {user && !user?.isAnonymous ? (
-                    <Text style={[styles.helloText, ]} numberOfLines={2} ellipsizeMode="tail">
+                    <Text
+                      style={[styles.helloText]}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
                       {"Hello, " + displayName}
                     </Text>
                   ) : (
@@ -312,8 +349,15 @@ function MobileComponent({ user, displayName, userPhoto, navigateNotification, o
                 {"Welcome back to LaborSeek!"}
               </Text>
 
-              <SearchBar styleContainer={{ marginTop: 16 }} isEditable={false} onPress={onClickSearch} />
-              <GridCategories onClick={onClickCategory} categories={categories}/>
+              <SearchBar
+                styleContainer={{ marginTop: 16 }}
+                isEditable={false}
+                onPress={onClickSearch}
+              />
+              <GridCategories
+                onClick={onClickCategory}
+                categories={categories}
+              />
               <PosterImage />
             </View>
           </ScrollView>
@@ -379,14 +423,10 @@ const ProfileImage = ({ photoUrl, onPress, isAccountPremium }) => {
       <TouchableOpacity onPress={onPress}>
         <Image
           style={styles.roundImage}
-          source={
-            photoUrl
-              ? { uri: photoUrl }
-              : Resources.icons.ic_placeholder
-          }
+          source={photoUrl ? { uri: photoUrl } : Resources.icons.ic_placeholder}
         />
-        {isAccountPremium  && (
-            <View
+        {isAccountPremium && (
+          <View
             style={{
               position: "absolute",
               bottom: 0,
@@ -408,8 +448,8 @@ const ProfileImage = ({ photoUrl, onPress, isAccountPremium }) => {
               }}
               source={Resources.icons.ic_diamond_premium}
             />
-          </View> 
-          )}
+          </View>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -424,15 +464,16 @@ const PosterImage = () => {
 };
 
 const GridCategories = ({ categories, onClick }) => {
-
   const renderItem = ({ item, index }) => {
     return (
-      <TouchableOpacity onPress={() => {
-        onClick(item, index)
-      }}>
+      <TouchableOpacity
+        onPress={() => {
+          onClick(item, index);
+        }}
+      >
         <View style={styles.gridItem}>
           <View style={styles.gridCircle}>
-            <Image style={styles.gridIcon} source={{uri: item.icon}} />
+            <Image style={styles.gridIcon} source={{ uri: item.icon }} />
           </View>
           <Text style={styles.itemText}>{item.name}</Text>
         </View>
@@ -444,22 +485,21 @@ const GridCategories = ({ categories, onClick }) => {
     <FlatList
       data={categories}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id } // Use a unique key if available
+      keyExtractor={(item) => item.id} // Use a unique key if available
       numColumns={4} // Number of columns in the grid
       contentContainerStyle={styles.grid}
     />
   );
 };
 
-
- function HomeScreen() {
+function HomeScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const [currentUser, setUser] = useState(null);
-  const [displayName, setDisplayName] = useState(null)
-  const [userPhoto, setUserPhoto] = useState(null)
-  const [categories, setCategories] = useState(null)
-  const [isAccountPremium, setIsAccountPremium] = useState(null)
+  const [displayName, setDisplayName] = useState(null);
+  const [userPhoto, setUserPhoto] = useState(null);
+  const [categories, setCategories] = useState(null);
+  const [isAccountPremium, setIsAccountPremium] = useState(null);
   const onClickSignIn = React.useCallback(() => {
     navigation.navigate("Login");
   }, []);
@@ -470,7 +510,7 @@ const GridCategories = ({ categories, onClick }) => {
     navigation.navigate("Bookings");
   }, []);
 
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchUser = async () => {
       let currentUser;
@@ -490,12 +530,12 @@ const GridCategories = ({ categories, onClick }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await getCategories();  // Call the function
-        setCategories(data);  // Set the categories data to state
+        const data = await getCategories(); // Call the function
+        setCategories(data); // Set the categories data to state
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
-        setLoading(false);  // Stop loading once data is fetched
+        setLoading(false); // Stop loading once data is fetched
       }
     };
 
@@ -503,8 +543,6 @@ const GridCategories = ({ categories, onClick }) => {
   }, []);
 
   const { user, error } = getUserData(currentUser?.uid);
-
-
 
   const onClickNewNotif = React.useCallback(
     async (id) => {
@@ -516,7 +554,9 @@ const GridCategories = ({ categories, onClick }) => {
         }
 
         await markNotificationAsRead(currentUser.uid, id);
-        console.log(`Notification ${id} marked as read for user ${currentUser.uid}`);
+        console.log(
+          `Notification ${id} marked as read for user ${currentUser.uid}`
+        );
       } catch (error) {
         console.error("Error while marking notification as read:", error);
       }
@@ -550,20 +590,22 @@ const GridCategories = ({ categories, onClick }) => {
   };
 
   const onClickCategory = React.useCallback((item, index) => {
-    navigation.navigate("ServicesScreen", {name: item.name, image: item.image})
-  }, [])
+    navigation.navigate("ServicesScreen", {
+      name: item.name,
+      image: item.image,
+    });
+  }, []);
 
   const onClickSearch = React.useCallback(() => {
-    navigation.navigate("SearchServices")
-  }, [])
+    navigation.navigate("SearchServices");
+  }, []);
 
   useEffect(() => {
-    console.log(`User data is ${user}`)
+    console.log(`User data is ${user}`);
     if (user) {
-      setDisplayName(user.firstName + " " + user.lastName)
-      setUserPhoto(user.photoUrl)
+      setDisplayName(user.firstName + " " + user.lastName);
+      setUserPhoto(user.photoUrl);
       setIsAccountPremium(user.isAccountPremium);
-
     }
   }, [user]);
   if (Platform.OS === "web") {
@@ -577,14 +619,21 @@ const GridCategories = ({ categories, onClick }) => {
         onClickNewNotif={onClickNewNotif}
         onClickCategory={onClickCategory}
         onClickSearch={onClickSearch}
+        onClickDiscountAndVoucher={() => {
+          navigation.navigate("VouchersScreen", {userId: currentUser?.uid})
+
+        }}
         isAccountPremium={isAccountPremium}
         onClickPremiumAccount={() => {
-          if(isAccountPremium){
-          navigation.navigate("CancelPremiumScreen", {userId : user?.uid});
-            
+          if (isAccountPremium) {
+            navigation.navigate("CancelPremiumScreen", { userId: currentUser?.uid });
+
             return;
           }
-          navigation.navigate("PremiumAccount", {userId: user?.uid, name: displayName});
+          navigation.navigate("PremiumAccount", {
+            userId: currentUser?.uid,
+            name: displayName,
+          });
         }}
         onClickSettings={() => {
           navigateToScreen("Settings");
@@ -599,9 +648,9 @@ const GridCategories = ({ categories, onClick }) => {
   }
 
   return (
-    < MobileComponent
-    onClickSearch={onClickSearch}
-    categories={categories}
+    <MobileComponent
+      onClickSearch={onClickSearch}
+      categories={categories}
       user={currentUser}
       displayName={displayName}
       userPhoto={userPhoto}
@@ -625,7 +674,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: Resources.colors.black,
     marginRight: 40,
-    
   },
   helloTextWeb: {
     fontSize: 48,
@@ -716,4 +764,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {HomeScreen, ProfileImage, NotificationButton}
+export { HomeScreen, ProfileImage, NotificationButton };

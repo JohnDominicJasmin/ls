@@ -11,7 +11,9 @@ const Resources = {
         silver: '#CDCBCB',
         mercury: '#E2E2E2',
         gray_1: '#7e7e7e',
-        emperor: '#555555'
+        emperor: '#555555',
+        solitude: '#E0EBFF',
+        silver_chalice: '#A7A7A7'
         
 
     },
