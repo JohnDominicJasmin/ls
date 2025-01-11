@@ -288,13 +288,7 @@ function MobileComponent({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <SafeAreaView>
-      <BannerAd
-      unitId={TestIds.BANNER} // Replace with your AdMob unit ID for production
-      size={BannerAdSize.FULL_BANNER}
-      requestOptions={{
-        requestNonPersonalizedAdsOnly: true,
-      }}
-    />
+  
         <View
           style={{
             height: "100%",
