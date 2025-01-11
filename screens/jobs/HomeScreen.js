@@ -33,7 +33,6 @@ import { getUserData } from "../../utils/userDb";
 import NavigationBar from "../../ui/NavigationBar";
 const { width, height } = Dimensions.get("window");
 import { getCategories } from "../../utils/userDb";
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 function WebComponent({
   user: user,
