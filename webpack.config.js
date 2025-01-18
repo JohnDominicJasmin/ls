@@ -1,24 +1,27 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: 'index.js', // Your entry file
+  entry: './index.web.js', // Point to the new entry file
   output: {
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
   },
   resolve: {
-    alias: {
-      'react-native$': 'react-native-web',
-    },
-    extensions: ['.web.js', '.js', '.json'],
+    extensions: ['.web.js', '.js', '.jsx'],
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: ['babel-loader'],
+        use: 'babel-loader',
       },
     ],
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './public/index.html', // Use the new HTML template
+    }),
+  ],
 };
