@@ -156,9 +156,16 @@ function SignUpScreen() {
           firstName: firstName,
           lastName: lastName,
           email: email,
-          password: password,
           userId: userId,
-          createdAt: new Date().toISOString(), // Timestamp
+          premiumAccountApplied: null, 
+          address: "",
+          barangay: "",
+          city: "",
+          province: "",
+          phoneNumber: "",
+          photoUrl: "",
+          points: 0,
+
         };
         createUserData(userId, userData)
           .then(() => {

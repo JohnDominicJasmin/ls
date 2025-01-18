@@ -19,7 +19,7 @@ import {
 import { useState, useEffect } from "react";
 import { average } from "firebase/firestore";
 
-const ReviewsSection = ({ ratings, averageRating }) => {
+const ReviewsSection = ({ ratings }) => {
   const renderItem = ({ item }) => {
     return (
       <View style={{ flexDirection: "column" }}>
@@ -33,7 +33,7 @@ const ReviewsSection = ({ ratings, averageRating }) => {
               source={Resources.icons.ic_star}
               style={styles.starIconItemRating}
             />
-            <Text style={styles.ratingItemRating}>{averageRating}</Text>
+            <Text style={styles.ratingItemRating}>{item.rating}</Text>
           </View>
         </View>
 
@@ -157,6 +157,19 @@ function MobileComponent({
             left: 4,
           }}
         />
+
+        <View
+          style={[
+            styles.ratingContainerItemRating,
+            { position: "absolute", bottom: 10, right: 10 },
+          ]}
+        >
+          <Image
+            source={Resources.icons.ic_star}
+            style={styles.starIconItemRating}
+          />
+          <Text style={styles.ratingItemRating}>{averageRating}</Text>
+        </View>
       </View>
 
       <View>
@@ -165,19 +178,13 @@ function MobileComponent({
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
         />
-        <ReviewsSection ratings={ratings} averageRating={averageRating} />
+        <ReviewsSection ratings={ratings} />
       </View>
     </View>
   );
 }
 
-function WebComponent({
-  openBookService,
-  imageUrl,
-  services,
-  ratings,
-  averageRating,
-}) {
+function WebComponent({ openBookService, imageUrl, services, ratings, averageRating }) {
   const renderItem = ({ item }) => {
     return (
       <ServiceItem
@@ -217,14 +224,28 @@ function WebComponent({
         }}
       >
         <View style={{ flex: 1, flexDirection: "column" }}>
-          <Image
-            style={{
-              width: "70%",
-              height: 300,
-              resizeMode: "cover",
-            }}
-            source={{ uri: imageUrl }}
-          />
+          <View style={{width: "70%"}}>
+            <Image
+              style={{
+                height: 300,
+                resizeMode: "cover",
+              }}
+              source={{ uri: imageUrl }}
+            />
+            <View
+              style={[
+                styles.ratingContainerItemRating,
+                { position: "absolute", bottom: 10, right: 10 },
+              ]}
+            >
+              <Image
+                source={Resources.icons.ic_star}
+                style={styles.starIconItemRating}
+              />
+              <Text style={styles.ratingItemRating}>{averageRating}</Text>
+            </View>
+          </View>
+
           <FlatList
             data={services}
             renderItem={renderItem}
@@ -239,15 +260,14 @@ function WebComponent({
             width: "35%",
           }}
         >
-        <ReviewsSection ratings={ratings} averageRating={averageRating} />
-
+          <ReviewsSection ratings={ratings} />
         </View>
       </View>
     </View>
   );
 }
 
- function ServiceScreen({ route }) {
+function ServiceScreen({ route }) {
   const navigation = useNavigation();
   const { name, image } = route.params;
   const [services, setServices] = useState([]);
@@ -261,7 +281,7 @@ function WebComponent({
       maxPrice: item.max_price,
       minPrice: item.min_price,
       serviceTypeName: name,
-      serviceImage: item.imageUrl
+      serviceImage: item.imageUrl,
     });
   };
 
@@ -430,5 +450,4 @@ const styles = StyleSheet.create({
   },
 });
 
-
-export { ServiceScreen, ServiceItem }
+export { ServiceScreen, ServiceItem };

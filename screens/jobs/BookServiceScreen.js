@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  Alert,
 } from "react-native";
 import TopAppBar from "../auth/components/TopAppBar";
 import Resources from "../../src/Resources";
@@ -561,8 +562,14 @@ function WebComponent({
 }
 
 function BookServiceScreen({ route }) {
-  const { serviceId, serviceTypeName, serviceName, maxPrice, minPrice, serviceImage } =
-    route.params;
+  const {
+    serviceId,
+    serviceTypeName,
+    serviceName,
+    maxPrice,
+    minPrice,
+    serviceImage,
+  } = route.params;
   const navigation = useNavigation();
   const [currentUser, setUser] = useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -604,6 +611,8 @@ function BookServiceScreen({ route }) {
     const formatted = `${adjustedHours}:${minutes
       .toString()
       .padStart(2, "0")} ${period}`;
+
+    console.log(`Formatted hours ${formatted}`);
     setTime(formatted);
   }, []);
 
@@ -649,14 +658,10 @@ function BookServiceScreen({ route }) {
       setAddress(user.address);
       setPhoneNumber(user.phoneNumber);
       setIsAccountPremium(user.isAccountPremium);
-      const fullAddress =
-        user.address +
-        ", " +
-        user.barangay +
-        ", " +
-        user.city +
-        ", " +
-        user.province;
+      const fullAddress = [user.address, user.barangay, user.city]
+        .filter((property) => property && property.trim()) // Filter out empty or whitespace-only properties
+        .join(", "); // Join remaining properties with ", "
+
       setFullAddress(fullAddress);
     }
   }, [user]);
@@ -697,8 +702,8 @@ function BookServiceScreen({ route }) {
       bookedService: serviceName,
       city: city,
       code: discountCode,
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString(),
+      date: date.toLocaleDateString(),
+      time: time,
       discountPercentage: discount,
       isActive: true,
       isPaid: false,
@@ -743,6 +748,42 @@ function BookServiceScreen({ route }) {
       setMinAmountError("Please enter a valid amount");
       return;
     }
+
+    if(phoneNumber === ''){
+    
+      Alert.alert(
+        'Please fill up your phone number', // Title
+        '', // Message
+        [
+          {
+            text: 'Okay',
+            onPress: () => {
+              navigation.navigate('UserProfile');
+            },
+          },
+        ]
+      )
+      return;
+    }
+    if(fullAddress === ''){
+      Alert.alert(
+        'Please fill up your address', // Title
+        '', // Message
+        [
+          {
+            text: 'Okay',
+            onPress: () => {
+              navigation.navigate('UserProfile');
+            },
+          },
+        ]
+      );
+      
+      // Alert.alert('Please fill up your address');
+      return;
+    }
+
+    console.log(`Booking data ${JSON.stringify(bookingData)}`);
     setIsLoading(true);
 
     createBookingService(bookingData, onSuccess, onFailure);

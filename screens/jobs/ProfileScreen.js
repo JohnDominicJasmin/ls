@@ -122,7 +122,7 @@ const ProfileScreenContent = ({
             }}
           />
           <Text style={{ color: Resources.colors.black, fontWeight: "medium" }}>
-            {address}
+            {address===''? "No address provided": address}
           </Text>
         </View>
         {!isAccountPremium ? (
@@ -256,9 +256,12 @@ function ProfileScreen() {
       setDisplayName(user.firstName + " " + user.lastName);
       setUserPhoto(user.photoUrl);
       setIsAccountPremium(user.isAccountPremium);
-      const fullAddress =
-        user.address + ", " + user.barangay + ", " + user.city;
-      setFullAddress(fullAddress);
+      const fullAddress = [user.address, user.barangay, user.city]
+      .filter((property) => property && property.trim()) // Filter out empty or whitespace-only properties
+      .join(", "); // Join remaining properties with ", "
+    
+    setFullAddress(fullAddress);
+    
     }
   }, [user]);
 

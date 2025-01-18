@@ -129,7 +129,7 @@ const checkIfPremiumAccountExpired = (firestoreTimestamp) => {
   if(firestoreTimestamp === null){
     return true;
   }
-  const firebaseDate = new Date(firestoreTimestamp.seconds * 1000);
+  const firebaseDate = new Date(firestoreTimestamp?.seconds * 1000);
 
   const twoMonthsAgo = new Date();
   twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);

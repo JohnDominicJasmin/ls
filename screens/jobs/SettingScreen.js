@@ -745,7 +745,7 @@ function SettingScreen() {
 }
 const styles = StyleSheet.create({
   spinnerTextStyle: {
-    color: "#FFF",
+    o: "#FFF",
   },
 });
 export default SettingScreen;

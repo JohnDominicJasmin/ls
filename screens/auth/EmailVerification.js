@@ -17,7 +17,7 @@ function EmailVerification({route}) {
         CommonActions.reset({
           index: 0,
           routes: [
-            { name: 'Home' }, // The screen you want to navigate to
+            { name: 'Main' }, // The screen you want to navigate to
           ],
         })
       );

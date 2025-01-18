@@ -614,7 +614,7 @@ function BookingsScreen() {
         <Dialog
           isVisible={ratingItem !== null}
           onBackdropPress={onDismissRatingDialog}
-        >
+        > 
           <Dialog.Title title="Rate Booked Service" />
           <Text>How would you rate your booked service?</Text>
           <RatingStars rating={rating} setRating={setRating} />
@@ -628,7 +628,7 @@ function BookingsScreen() {
           />
           <Dialog.Actions>
             <Dialog.Button
-              title="Confirm Cancellation"
+              title="Rate User"
               onPress={confirmRating}
             />
             <Dialog.Button

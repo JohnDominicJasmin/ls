@@ -57,11 +57,11 @@ function ForgotPassword() {
   }, [email]);
   return (
     <>
-    <Spinner
-          visible={isLoading}
-          textContent={"Loading..."}
-          textStyle={styles.spinnerTextStyle}
-        />
+      {/* <Spinner
+            visible={isLoading}
+            textContent={"Loading..."}
+            textStyle={styles.spinnerTextStyle}
+          /> */}
     <View
       style={{
         flex: 1,
