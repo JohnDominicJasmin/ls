@@ -31,12 +31,36 @@ const ContactDetail = ({ style, address, phoneNumber }) => {
       <View style={style}>
         <View style={styles.row}>
           <Image source={Resources.icons.ic_location} style={styles.icon} />
-          <Text style={styles.text}>{address}</Text>
+          <Text
+            style={[
+              styles.text,
+              {
+                color:
+                  address === ""
+                    ? Resources.colors.alto
+                    : Resources.colors.black,
+              },
+            ]}
+          >
+            {address === "" ? "Address not available" : address}
+          </Text>
         </View>
 
         <View style={styles.row}>
-          <Image source={Resources.icons.ic_telephone} style={styles.icon} />
-          <Text style={styles.text}>{phoneNumber}</Text>
+          <Image source={Resources.icons.ic_telephone} style={[styles.icon]} />
+          <Text
+            style={[
+              styles.text,
+              {
+                color:
+                  phoneNumber === ""
+                    ? Resources.colors.alto
+                    : Resources.colors.black,
+              },
+            ]}
+          >
+            {phoneNumber === "" ? "Phone Number not available" : phoneNumber}
+          </Text>
         </View>
       </View>
     </>
@@ -45,8 +69,7 @@ const ContactDetail = ({ style, address, phoneNumber }) => {
 const ContactCard = ({ name, address, phoneNumber }) => {
   return (
     <View style={styles.cardContainer}>
-      <Text style={styles.name}>{name}</Text>
-
+      {name !== "" && <Text style={styles.name}>{name}</Text>}
       <ContactDetail address={address} phoneNumber={phoneNumber} />
     </View>
   );
@@ -230,7 +253,8 @@ function MobileComponent({
 
   minAmountError,
   maxAmountError,
-
+  serviceName,
+  currentUser,
   isAccountPremium,
   note,
   setNote,
@@ -248,7 +272,7 @@ function MobileComponent({
           marginTop: 34,
         }}
       >
-        {"Service Name"}
+        {serviceName}
       </Text>
 
       <View
@@ -352,15 +376,36 @@ function MobileComponent({
 
       <ServiceNote value={note} setValue={setNote} />
 
+      <BookServiceButton
+        submitBookingService={submitBookingService}
+        isGuest={currentUser && currentUser?.isAnonymous}
+      />
+    </>
+  );
+}
+
+function BookServiceButton({ submitBookingService, isGuest }) {
+  return (
+    <View
+      style={{
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <TouchableOpacity
+        disabled={isGuest}
         onPress={submitBookingService}
         style={{
-          backgroundColor: Resources.colors.royalBlue,
+          backgroundColor: isGuest
+            ? Resources.colors.alto
+            : Resources.colors.royalBlue,
           alignSelf: "center", // Ensures the button width matches its content
           paddingHorizontal: 40, // Adds padding around the text
           paddingVertical: 16, // Adds padding for height
           borderRadius: 8, // Optional: Rounds the button corners
-          marginVertical: 16,
+          marginTop: 16,
+          marginBottom: 8,
         }}
       >
         <Text
@@ -372,7 +417,20 @@ function MobileComponent({
           {"Book Service"}
         </Text>
       </TouchableOpacity>
-    </>
+
+      {isGuest && (
+        <Text
+          style={{
+            color: Resources.colors.gray,
+            fontSize: 12,
+            width: "50%",
+            textAlign: "center",
+          }}
+        >
+          {"Please login to book a service"}
+        </Text>
+      )}
+    </View>
   );
 }
 
@@ -384,7 +442,7 @@ function WebComponent({
   dateOfService,
   onClickServiceTime,
   timeOfService,
-
+  serviceName,
   discountErrorMessage,
   onClickApplyDiscount,
 
@@ -430,7 +488,7 @@ function WebComponent({
               marginTop: 34,
             }}
           >
-            {"Service Name"}
+            {serviceName}
           </Text>
 
           <View
@@ -535,26 +593,10 @@ function WebComponent({
 
           <ServiceNote value={note} setValue={setNote} />
 
-          <TouchableOpacity
-            onPress={submitBookingService}
-            style={{
-              backgroundColor: Resources.colors.royalBlue,
-              alignSelf: "center", // Ensures the button width matches its content
-              paddingHorizontal: 40, // Adds padding around the text
-              paddingVertical: 16, // Adds padding for height
-              borderRadius: 8, // Optional: Rounds the button corners
-              marginVertical: 16,
-            }}
-          >
-            <Text
-              style={{
-                color: Resources.colors.white,
-                fontSize: 16, // Optional: Adjusts font size
-              }}
-            >
-              {"Book Service"}
-            </Text>
-          </TouchableOpacity>
+          <BookServiceButton
+            submitBookingService={submitBookingService}
+            isGuest={currentUser && currentUser?.isAnonymous}
+          />
         </View>
       </View>
     </View>
@@ -583,6 +625,7 @@ function BookServiceScreen({ route }) {
   const [address, setAddress] = useState("");
   const [fullAddress, setFullAddress] = useState("");
   const [barangay, setBarangay] = useState("");
+  const [email, setEmail] = useState("");
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
   const [discount, setDiscount] = useState(0);
@@ -653,6 +696,7 @@ function BookServiceScreen({ route }) {
       setFirstName(user.firstName);
       setLastName(user.lastName);
       setBarangay(user.barangay);
+      setEmail(user.email);
       setCity(user.city);
       setProvince(user.province);
       setAddress(user.address);
@@ -704,6 +748,7 @@ function BookServiceScreen({ route }) {
       code: discountCode,
       date: date.toLocaleDateString(),
       time: time,
+      email: email,
       discountPercentage: discount,
       isActive: true,
       isPaid: false,
@@ -749,36 +794,35 @@ function BookServiceScreen({ route }) {
       return;
     }
 
-    if(phoneNumber === ''){
-    
+    if (phoneNumber === "") {
       Alert.alert(
-        'Please fill up your phone number', // Title
-        '', // Message
+        "Please fill up your phone number", // Title
+        "", // Message
         [
           {
-            text: 'Okay',
+            text: "Okay",
             onPress: () => {
-              navigation.navigate('UserProfile');
-            },
-          },
-        ]
-      )
-      return;
-    }
-    if(fullAddress === ''){
-      Alert.alert(
-        'Please fill up your address', // Title
-        '', // Message
-        [
-          {
-            text: 'Okay',
-            onPress: () => {
-              navigation.navigate('UserProfile');
+              navigation.navigate("UserProfile");
             },
           },
         ]
       );
-      
+      return;
+    }
+    if (fullAddress === "") {
+      Alert.alert(
+        "Please fill up your address", // Title
+        "", // Message
+        [
+          {
+            text: "Okay",
+            onPress: () => {
+              navigation.navigate("UserProfile");
+            },
+          },
+        ]
+      );
+
       // Alert.alert('Please fill up your address');
       return;
     }
@@ -861,6 +905,8 @@ function BookServiceScreen({ route }) {
             dateOfService={date.toLocaleDateString()}
             phoneNumber={phoneNumber}
             address={fullAddress}
+            serviceName={serviceName}
+            currentUser={currentUser}
             timeOfService={time}
             onClickServiceInput={() => {
               setDatePickerOpen(true);
@@ -890,6 +936,8 @@ function BookServiceScreen({ route }) {
               setMaxAmount(amount);
               setMaxAmountError("");
             }}
+            currentUser={currentUser}
+            serviceName={serviceName}
             onLostFocusMaxAmount={onLostFocusMaxAmount}
             onLostFocusMinAmount={onLostFocusMinAmount}
             minAmount={minAmount.toString()}
@@ -946,7 +994,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    color: "#333",
+    // color: "#333",
     flex: 1, // Ensures the text wraps properly
   },
   inputService: {

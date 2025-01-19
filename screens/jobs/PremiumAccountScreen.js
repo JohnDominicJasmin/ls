@@ -19,7 +19,7 @@ const TextLabelSection = ({ titleStyle, descriptionStyle }) => {
 
       <Text style={[descriptionStyle, { textAlign: "center" }]}>
         {
-          "Upgrade to a LaborSeek Premium Account for unlimited bookings, ad-free browsing, and exclusive discounts and vouchers on services."
+          "Upgrade to a LaborSeek Premium Account for unlimited bookings, and exclusive discounts and vouchers on services."
         }
       </Text>
     </View>

@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 20,
     alignItems: "center",
-    marginRight: 24,
+    marginRight: 12,
     marginVertical: 12,
     width: "auto", // Adjust width as needed
     alignSelf: "center",
@@ -57,11 +57,11 @@ const styles = StyleSheet.create({
   },
   codeText: {
     color: "#ffffff", // White text on button
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "600",
   },
   subText: {
-    fontSize: 14,
+    fontSize: 12,
     width: '80%',
   
     textAlign: "center",

@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
 import React, { useState } from "react";
@@ -68,14 +68,14 @@ function CancelPremiumScreen({ route }) {
         </Dialog.Actions>
       </Dialog>
 
-
       <Spinner
-          visible={isLoading}
-          textContent={"Loading..."}
-          textStyle={{
-            color: Resources.colors.white
-          }}
-        />
+        visible={isLoading}
+        textContent={"Loading..."}
+        textStyle={{
+          color: Resources.colors.white,
+        }}
+      />
+
       <View
         style={{
           flex: 1,
@@ -84,73 +84,79 @@ function CancelPremiumScreen({ route }) {
           backgroundColor: Resources.colors.white,
         }}
       >
-        <BackIcon style={{
-            top:14,
-            left: 14
-        }}/>
-
-        <View
-          style={{
-            flexDirection: "column",
-            marginTop: 24,
-            justifyContent: "center",
-            alignItems: "center",
-            alignContent: "center",
-          }}
-        >
-          <Image
-            source={Resources.images.ic_cancel_premium}
-            style={{
-              resizeMode: "center",
-              borderWidth: 1,
-              height: 450,
-              width: 400,
-            }}
-          />
-
-          <Text
-            style={[
-              {
-                fontSize: 24,
-                fontWeight: "bold",
-                textAlign: "center",
-                paddingHorizontal: 20,
-              },
-            ]}
-          >
-            {"Manage your Premium Subscription"}
-          </Text>
-
-          <Text
-            style={[
-              { textAlign: "center", paddingHorizontal: 16, marginTop: 8 },
-            ]}
-          >
-            {
-              "If you no longer need premium features, you can cancel your subscription anytime. Your account will return to the free version with standard access to services."
-            }
-          </Text>
-
-          <TouchableOpacity
-            style={{
-              backgroundColor: Resources.colors.royalBlue,
-              paddingVertical: 16,
-              paddingHorizontal: 32,
-              borderRadius: 8,
-              marginTop: 40,
-            }}
-            onPress={onClickCancelPremium}
-          >
-            <Text
+        <ScrollView>
+          <View>
+            <BackIcon
               style={{
-                color: Resources.colors.white,
-                fontSize: 16,
+                top: 14,
+                left: 14,
+              }}
+            />
+
+            <View
+              style={{
+                flexDirection: "column",
+                marginTop: 24,
+                justifyContent: "center",
+                alignItems: "center",
+                alignContent: "center",
               }}
             >
-              {"Cancel Premium"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Image
+                source={Resources.images.ic_cancel_premium}
+                style={{
+                  resizeMode: "center",
+                  borderWidth: 1,
+                  height: 450,
+                  width: 400,
+                }}
+              />
+
+              <Text
+                style={[
+                  {
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    paddingHorizontal: 20,
+                  },
+                ]}
+              >
+                {"Manage your Premium Subscription"}
+              </Text>
+
+              <Text
+                style={[
+                  { textAlign: "center", paddingHorizontal: 16, marginTop: 8 },
+                ]}
+              >
+                {
+                  "If you no longer need premium features, you can cancel your subscription anytime. Your account will return to the free version with standard access to services."
+                }
+              </Text>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: Resources.colors.royalBlue,
+                  paddingVertical: 16,
+                  paddingHorizontal: 32,
+                  borderRadius: 8,
+                  marginTop: 40,
+                }}
+                onPress={onClickCancelPremium}
+              >
+                <Text
+                  style={{
+                    color: Resources.colors.white,
+                    fontSize: 16,
+                  }}
+                >
+                  {"Cancel Premium"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </View>
     </>
   );

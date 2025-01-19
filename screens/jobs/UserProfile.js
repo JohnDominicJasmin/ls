@@ -369,8 +369,9 @@ function UserProfile() {
     setIsLoading(true);
     console.log(`IMage URI: ${imageUri}`);
     const hasHttp =
-      imageUri.startsWith("http://") || imageUri.startsWith("https://");
+      imageUri?.startsWith("http://") || imageUri?.startsWith("https://");
 
+      
     if (imageUri != null && !hasHttp) {
       uploadToCloudinary(
         imageUri,

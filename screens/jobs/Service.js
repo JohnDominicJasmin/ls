@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   rating: {
     marginLeft: 4,
     fontSize: 14,
-    color: "green",
+    color: Resources.colors.royalBlue,
   },
 
   containerItemRating: {
@@ -436,12 +436,12 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     marginRight: 4,
-    tintColor: "green", // Optional, for star color
+    tintColor: Resources.colors.royalBlue, // Optional, for star color
   },
   ratingItemRating: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "green",
+    color: Resources.colors.royalBlue,
   },
   dividerItemRating: {
     height: 1,

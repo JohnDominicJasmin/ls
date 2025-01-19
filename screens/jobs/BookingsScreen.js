@@ -257,10 +257,13 @@ function ServiceItem({
               fontWeight: "500",
               color: Resources.colors.black,
               fontSize: 16,
+              flexShrink: 1,
+              width: "95%",
             }}
           >
             {name}
           </Text>
+
           <View
             style={{
               flexDirection: "row",
@@ -282,7 +285,10 @@ function ServiceItem({
             <Text>{timeCreated}</Text>
           </View>
 
-          <Text>{`Amount Range: ${minAmount} - ${maxAmount}`}</Text>
+          <Text
+            style={{
+              width: "95%",
+          }}>{`Amount Range: ${minAmount} - ${maxAmount}`}</Text>
         </View>
       </View>
 
@@ -394,7 +400,7 @@ function MobileContent({
     return (
       <ServiceItem
         photoUrl={item.servicePhotoUrl}
-        name={item.name}
+        name={item.bookedService}
         dateCreated={item.date}
         timeCreated={item.time}
         minAmount={item.minBudget}
@@ -614,7 +620,7 @@ function BookingsScreen() {
         <Dialog
           isVisible={ratingItem !== null}
           onBackdropPress={onDismissRatingDialog}
-        > 
+        >
           <Dialog.Title title="Rate Booked Service" />
           <Text>How would you rate your booked service?</Text>
           <RatingStars rating={rating} setRating={setRating} />
@@ -627,10 +633,7 @@ function BookingsScreen() {
             numberOfLines={3}
           />
           <Dialog.Actions>
-            <Dialog.Button
-              title="Rate User"
-              onPress={confirmRating}
-            />
+            <Dialog.Button title="Rate User" onPress={confirmRating} />
             <Dialog.Button
               title="Keep Booking"
               onPress={onDismissRatingDialog}
@@ -674,6 +677,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 5,
     flexDirection: "column",
+    flex: 1,
+    height: "100%",
+    justifyContent: "center",
     gap: 40,
   },
   screen: {
@@ -709,12 +715,15 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     height: "auto",
     marginVertical: 8,
-    padding: 8, // Optional for spacing inside the container
-    borderRadius: 12, // For rounded corners
-    backgroundColor: "#fff", // Background color is necessary for shadows to be visible
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: "#fff",
     borderColor: Resources.colors.alto,
     borderWidth: 0.5,
+    width: "100%",
+    overflow: "hidden",
   },
+
   dashedLine: {
     marginVertical: 16,
     borderWidth: 0.9, // Thickness of the line

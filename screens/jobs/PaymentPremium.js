@@ -24,7 +24,6 @@ import { Button, Dialog, CheckBox, ListItem, Avatar } from "@rneui/themed";
 const BulletPoints = () => {
   const items = [
     "Unlimited Bookings",
-    "Ad-free experience",
     "Exclusive Discounts and Vouchers",
   ];
 
@@ -119,7 +118,6 @@ function PaymentPremium({ route }) {
   };
   return (
     <ScrollView style={styles.container}>
-        <BackIcon style={{ position: "absolute", top: 16, left: 20 }} />
 
       <View
          style={{
@@ -129,6 +127,8 @@ function PaymentPremium({ route }) {
           overflow: "hidden", // Ensures content doesn't visually overflow the parent
         }}
       >
+        <BackIcon style={{ position: "absolute", top: 16, left: 20 }} />
+
         <Spinner
           visible={isLoading}
           textContent={"Loading..."}

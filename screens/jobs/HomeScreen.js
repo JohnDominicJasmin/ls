@@ -126,7 +126,7 @@ function WebComponent({
               {"Hello, " + displayName}
             </Text>
           ) : (
-            <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
+            <Text style={styles.helloText}>{"Welcome to LaborSeek!"}</Text>
           )}
           <Text
             style={{
@@ -134,7 +134,7 @@ function WebComponent({
               fontSize: 20,
             }}
           >
-            {"Welcome back to LaborSeek!"}
+            {"You're are welcome to search services and book appointments"}
           </Text>
         </View>
 
@@ -148,6 +148,7 @@ function WebComponent({
         >
           <FlatList
             data={categories}
+            scrollEnabled={true}
             horizontal={true}
             renderItem={renderItem}
             keyExtractor={(item, index) => item.id}
@@ -288,6 +289,7 @@ function MobileComponent({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <SafeAreaView>
+        <ScrollView>
   
         <View
           style={{
@@ -323,7 +325,7 @@ function MobileComponent({
                       {"Hello, " + displayName}
                     </Text>
                   ) : (
-                    <Text style={styles.helloText}>{"Hello, Guest User"}</Text>
+                    <Text style={styles.helloText}>{"Welcome to LaborSeek!"}</Text>
                   )}
                 </View>
 
@@ -339,7 +341,7 @@ function MobileComponent({
               </View>
 
               <Text style={styles.welcomeText}>
-                {"Welcome back to LaborSeek!"}
+                {"You're are welcome to search services and book appointments"}
               </Text>
 
               <SearchBar
@@ -355,6 +357,8 @@ function MobileComponent({
             </View>
           </ScrollView>
         </View>
+        </ScrollView>
+
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -476,11 +480,16 @@ const GridCategories = ({ categories, onClick }) => {
 
   return (
     <FlatList
+      scrollEnabled={true}
       data={categories}
       renderItem={renderItem}
       keyExtractor={(item) => item.id} // Use a unique key if available
-      numColumns={4} // Number of columns in the grid
-      contentContainerStyle={styles.grid}
+      numColumns={4} ,
+      style={{ flex: 1 }} // Ensures the FlatList respects parent container width
+  contentContainerStyle={{
+    paddingHorizontal: 16, // Optional padding
+    maxWidth: '100%', // Prevents it from exceeding parent's width
+  }}
     />
   );
 };

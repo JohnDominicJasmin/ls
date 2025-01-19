@@ -397,6 +397,15 @@ function LoginScreen() {
     }
   })
   const loginAccount = React.useCallback(async () => {
+
+    if(email === null || email === ""){
+      setEmailError("Email is required");
+      return;
+    }
+    if(password === null || password === ""){
+      setPasswordError("Password is required");
+      return;
+    }
     try {
       setIsLoading(true);
       const userCredential = await signIn();

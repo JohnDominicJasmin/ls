@@ -1,10 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
 import Resources from "../src/Resources";
 
 function UploadReceipt({ onClickUpload, onClickSubmit, imageName, uploadReceiptError, handleRemoveFile}) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, Platform.OS === 'web' && { maxWidth: '100%' }]}>
+
       <Text
         style={{
           fontSize: 14,
@@ -64,7 +65,6 @@ const styles = StyleSheet.create({
     backgroundColor: Resources.colors.white, // Light background color
     padding: 16,
     justifyContent: "center",
-    maxWidth: '100%', 
     alignItems: "center",
   },
   header: {
