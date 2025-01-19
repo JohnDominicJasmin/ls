@@ -484,7 +484,7 @@ const GridCategories = ({ categories, onClick }) => {
       data={categories}
       renderItem={renderItem}
       keyExtractor={(item) => item.id} // Use a unique key if available
-      numColumns={4} ,
+      numColumns={4} 
       style={{ flex: 1 }} // Ensures the FlatList respects parent container width
   contentContainerStyle={{
     paddingHorizontal: 16, // Optional padding
