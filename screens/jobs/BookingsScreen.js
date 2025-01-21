@@ -131,6 +131,58 @@ const RateAndPaidSection = ({ isRated, onClickRate, onClickPaid }) => {
     </>
   );
 };
+
+function NoBookingsAvailable() {
+  return (
+    <>
+      <View
+        style={{
+          width: "100%",
+          justifyContent: "top",
+          alignItems: "center",
+          flexDirection: "column",
+          marginTop: 25,
+          height: "100%",
+          backgroundColor: Resources.colors.white,
+        }}
+      >
+        <Image
+          style={{
+            width: 270,
+            height: 270,
+            marginTop: 75,
+            resizeMode: "center",
+          }}
+          source={Resources.icons.ic_no_bookings}
+        />
+
+        <Text
+          style={{
+            fontWeight: "semibold",
+            fontSize: 18,
+            marginTop: 12,
+          }}
+        >
+          {"No Bookings Yet"}
+        </Text>
+
+        <Text
+          style={{
+            textAlign: "center",
+            fontSize: 14,
+            color: Resources.colors.boulder,
+            paddingHorizontal: 16,
+            marginTop: 12,
+          }}
+        >
+          {
+            "It looks like you haven't booked any services yet. Start exploring home service options and manage all your upcoming bookings right here!"
+          }
+        </Text>
+      </View>
+    </>
+  );
+}
 function Indicator({ indicatorActive, selectIndicator }) {
   const getBorderBottomColor = (indicator) => {
     return indicatorActive === indicator
@@ -288,7 +340,8 @@ function ServiceItem({
           <Text
             style={{
               width: "95%",
-          }}>{`Amount Range: ${minAmount} - ${maxAmount}`}</Text>
+            }}
+          >{`Amount Range: ${minAmount} - ${maxAmount}`}</Text>
         </View>
       </View>
 
@@ -441,6 +494,11 @@ function MobileContent({
         height: "100%",
       }}
     >
+
+
+      <View style={{
+        flexDirection: 'column'
+      }}>
       <Indicator
         indicatorActive={indicatorActive}
         selectIndicator={selectIndicator}
@@ -451,6 +509,7 @@ function MobileContent({
         style={{
           marginHorizontal: 20,
         }}
+        ListEmptyComponent={<NoBookingsAvailable />}
         ListFooterComponent={<View />}
         ListFooterComponentStyle={{ height: 150 }}
         contentContainerStyle={{
@@ -459,20 +518,12 @@ function MobileContent({
         renderItem={renderItem}
         keyExtractor={(item, index) => index.toString()} // Use a unique key if available
       />
+      </View>
     </View>
   );
 }
 
-function WebComponent({
-  indicatorActive,
-  selectIndicator,
-  doneBookings,
-  bookings,
-  cancelBooking,
 
-  onClickRate,
-  onClickPaid,
-}) {}
 
 function BookingsScreen() {
   const [user, setUser] = useState(null);

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Resources from "../../src/Resources";
-import { use } from "react";
+import { FlatGrid } from 'react-native-super-grid';
 import { firebaseAuth } from "../../firebaseconfig";
 import auth, { firebase } from "@react-native-firebase/auth";
 import SearchBar from "../auth/components/SearchBar";
@@ -134,7 +134,7 @@ function WebComponent({
               fontSize: 20,
             }}
           >
-            {"You're are welcome to search services and book appointments"}
+            {"You're welcome to search services and book appointments"}
           </Text>
         </View>
 
@@ -341,7 +341,7 @@ function MobileComponent({
               </View>
 
               <Text style={styles.welcomeText}>
-                {"You're are welcome to search services and book appointments"}
+                {"You're welcome to search services and book appointments"}
               </Text>
 
               <SearchBar
@@ -479,17 +479,24 @@ const GridCategories = ({ categories, onClick }) => {
   };
 
   return (
-    <FlatList
-      scrollEnabled={true}
+    <FlatGrid
+      itemDimension={70}
       data={categories}
       renderItem={renderItem}
-      keyExtractor={(item) => item.id} // Use a unique key if available
-      numColumns={4} 
-      style={{ flex: 1 }} // Ensures the FlatList respects parent container width
-  contentContainerStyle={{
-    paddingHorizontal: 16, // Optional padding
-    maxWidth: '100%', // Prevents it from exceeding parent's width
-  }}
+      spacing={8}
+      keyExtractor={(item) => item.id} 
+
+      // Use a unique key if available
+      // style={{
+      //   flex: 1,
+
+      //   borderWidth: 1,
+
+      //   maxWidth: "100%", // Prevents it from exceeding parent's width
+      // }} // Ensures the FlatList respects parent container width
+      // contentContainerStyle={{
+      //   paddingHorizontal: 16, // Optional padding
+      // }}
     />
   );
 };
@@ -716,8 +723,8 @@ const styles = StyleSheet.create({
   posterImage: {
     flex: 1,
     width: "100%",
-    marginTop: 16,
-    height: 400,
+    marginTop: 6,
+    height: Dimensions.get("window").height * 0.5,
     resizeMode: "center",
   },
   welcomeText: {

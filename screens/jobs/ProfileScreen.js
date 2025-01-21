@@ -18,7 +18,7 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
       }}
     >
       <Image source={Resources.icons.ic_rocket} style={styles.calendarIcon} />
-      <Text style={styles.guestTextTitle}>View your Bookings</Text>
+      <Text style={styles.guestTextTitle}>Get started with LaborSeek</Text>
       <Text style={styles.guestTextDescription}>
         Join LaborSeek to book trusted home services, enjoy easy payments, and
         access exclusive discounts
@@ -62,7 +62,8 @@ const ProfileScreenContent = ({
       >
         <View>
           <Image
-            source={imageSource}
+          
+            source={imageSource ? { uri: imageSource } : Resources.icons.ic_placeholder}
             style={{
               height: 90,
               width: 90,
@@ -305,7 +306,7 @@ function ProfileScreen() {
           />
         ) : (
           <ProfileScreenContent
-            imageSource={{ uri: userPhoto }}
+            imageSource={userPhoto}
             name={displayName}
             address={fullAddress}
             isAccountPremium={isAccountPremium}

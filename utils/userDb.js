@@ -15,6 +15,7 @@ import {
 
 export function useNotification(userId) {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -22,12 +23,11 @@ export function useNotification(userId) {
 
     let unsubscribe;
 
+    setLoading(true); // Start loading
+
     if (Platform.OS === "web") {
-      // Firestore instance for web
       const db = getFirestore();
       const notificationsRef = collection(db, `users/${userId}/notifications`);
-
-      // Real-time listener for web
       unsubscribe = onSnapshot(
         query(notificationsRef),
         (querySnapshot) => {
@@ -35,39 +35,37 @@ export function useNotification(userId) {
             id: doc.id,
             ...doc.data(),
           }));
-          console.log("Notifications (Web):", notificationsArray);
           setNotifications(notificationsArray);
+          setLoading(false); // Done loading
         },
         (err) => {
           console.error("Error fetching notifications (Web):", err);
           setError(err);
+          setLoading(false); // Done loading
         }
       );
     } else {
-      // Firestore instance for mobile
       const notificationsRef = firestore()
         .collection("users")
         .doc(userId)
         .collection("notifications");
-
-      // Real-time listener for mobile
       unsubscribe = notificationsRef.onSnapshot(
         (snapshot) => {
           const notificationsArray = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
-          console.log("Notifications (Mobile):", notificationsArray);
           setNotifications(notificationsArray);
+          setLoading(false); // Done loading
         },
         (err) => {
           console.error("Error fetching notifications (Mobile):", err);
           setError(err);
+          setLoading(false); // Done loading
         }
       );
     }
 
-    // Cleanup listener on unmount
     return () => {
       if (unsubscribe) {
         unsubscribe();
@@ -75,8 +73,9 @@ export function useNotification(userId) {
     };
   }, [userId]);
 
-  return { notifications, error };
+  return { notifications, loading, error };
 }
+
 
 async function updateUserFieldsWeb(userId, fields, onSuccess, onFailure) {
   if (!userId || !fields || typeof fields !== "object") {

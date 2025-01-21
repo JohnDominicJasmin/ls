@@ -40,7 +40,9 @@ const Resources = {
         ic_setting: require('../assets/icons/ic_setting.png'),
         ic_location: require('../assets/icons/ic_location.png'),
         ic_key: require('../assets/icons/ic_key.png'),
-        ic_star: require('../assets/icons/ic_star.png')
+        ic_star: require('../assets/icons/ic_star.png'),
+        ic_notification_empty: require('../assets/icons/ic_notification_empty.png'),
+        ic_no_bookings: require('../assets/icons/ic_no_bookings.png'),
     },
     images: {
         ic_gcash_qr: require('../assets/images/gcash_qr.png'),

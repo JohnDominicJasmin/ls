@@ -16,7 +16,8 @@ import Resources from "../../src/Resources";
 import BackIcon from "../../ui/BackIcon";
 import { useNavigation } from "@react-navigation/native";
 import CreateAnAccountSection from "../auth/components/CreateAnAccountSection";
-
+import Spinner from "react-native-loading-spinner-overlay";
+import ErrorState from "../../ui/ErrorState";
 import { markNotificationAsRead, useNotification } from "../../utils/userDb";
 import TopAppBar from "../auth/components/TopAppBar";
 import {
@@ -41,14 +42,85 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
     />
   </View>
 );
-
-function NotificationSection({ userId, onClickNewNotif }) {
-  const { notifications, error } = useNotification(userId);
+function NotificationEmptyState() {
   return (
-    <NewNotificationSection
-      notifications={notifications}
-      onClickNewNotif={onClickNewNotif}
-    />
+    <View
+      style={{
+        width: "100%",
+        justifyContent: "top",
+        alignItems: "center",
+        flexDirection: "column",
+        marginTop: 25,
+        height: "100%",
+        backgroundColor: Resources.colors.white,
+      }}
+    >
+      <Image
+        style={{
+          width: 270,
+          height: 270,
+          marginTop: 75,
+          resizeMode: "center",
+        }}
+        source={Resources.icons.ic_notification_empty}
+      />
+
+      <Text
+        style={{
+          fontWeight: "semibold",
+          fontSize: 18,
+          marginTop: 12,
+        }}
+      >
+        {"No Notification yet"}
+      </Text>
+
+      <Text
+        style={{
+          textAlign: "center",
+          fontSize: 14,
+          color: Resources.colors.boulder,
+          paddingHorizontal: 16,
+          marginTop: 12,
+        }}
+      >
+        {
+          "Any updates or important information will appear here, so check back soon to stay in the loop with your bookings and service alerts."
+        }
+      </Text>
+    </View>
+  );
+}
+function NotificationSection({ userId, onClickNewNotif }) {
+  const { notifications, loading, error } = useNotification(userId);
+
+  if (loading) {
+    return (
+      <Spinner
+        visible={loading}
+        textContent={"Loading..."}
+        textStyle={{
+          color: Resources.colors.white,
+        }}
+      />
+    );
+  }
+
+  if (error) {
+    return <ErrorState message="Error loading notifications." />;
+  }
+
+  return (
+    <>
+      {notifications.length > 0 && !error ? (
+        <NewNotificationSection
+          notifications={notifications}
+          onClickNewNotif={onClickNewNotif}
+        />
+      ) : (
+        <NotificationEmptyState />
+      )}
+    </>
   );
 }
 function NewNotificationSection({ notifications, onClickNewNotif }) {
