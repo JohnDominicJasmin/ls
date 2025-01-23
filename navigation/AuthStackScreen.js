@@ -24,6 +24,7 @@ import {PaymentPremium} from '../screens/jobs/PaymentPremium';
 import ProfileScreen from '../screens/jobs/ProfileScreen';
 import CancelPremiumScreen from '../screens/jobs/CancelPremiumScreen';
 import VouchersScreen from '../screens/jobs/VouchersScreen';
+import ServicePaymentScreen from '../screens/jobs/ServicePaymentScreen';
 
 const Stack = createStackNavigator();
 
@@ -83,7 +84,7 @@ const AuthenticationStackScreen = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" />
-      <Stack.Navigator initialRouteName={initialRoute}>
+      <Stack.Navigator mode="card"  screenOptions={{ cardStyle: { flex: 1 } }} initialRouteName={initialRoute}>
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EmailVerification" component={EmailVerification} options={{ headerShown: false }} />
@@ -91,8 +92,9 @@ const AuthenticationStackScreen = () => {
           <Stack.Screen name="Main" component={MainTabNavigator} options={{ headerShown: false }} />
         ) : ( <Stack.Screen name="Main" component={HomeScreen} options={{ headerShown: false }} />)}
         
+        <Stack.Screen name="ServicePayment" component={ServicePaymentScreen} options={{ headerShown: false }} />
         <Stack.Screen name="BookService" component={BookServiceScreen} options={{headerShown: false}} />
-        <Stack.Screen name="Bookings" component={BookingsScreen}options={{ headerShown: false }} />
+        <Stack.Screen name="Bookings" component={BookingsScreen} mode="card"  screenOptions={{ cardStyle: { flex: 1 }, headerShown: false}} />
         <Stack.Screen name="SearchServices" component={SearchServices} options={{ headerShown: false }}/>
         <Stack.Screen name="PaymentPremium" component={PaymentPremium} options={ {headerShown: false}}/>
         <Stack.Screen name="PremiumAccount" component={PremiumAccountScreen}  options={{ headerShown: false }} />

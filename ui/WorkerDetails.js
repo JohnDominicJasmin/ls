@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import Resources from '../src/Resources';
 
-const WorkerDetails = ({workerPhotoUrl, workerName, isPaid, serviceFee, discount, total}) => {
+const WorkerDetails = ({workerPhotoUrl, workerName, workerPhoneNumber, isPaid, serviceFee, discount, total}) => {
   return (
     <View style={styles.container}>
       {/* Worker Details */}
@@ -12,7 +12,11 @@ const WorkerDetails = ({workerPhotoUrl, workerName, isPaid, serviceFee, discount
           source={workerPhotoUrl === ''? Resources.images.ic_profile : { uri: workerPhotoUrl }} // Replace with the actual image URL
           style={styles.workerImage}
         />
+        <View>
         <Text style={styles.workerName}>{workerName}</Text>
+        <Text style={{}}>{workerPhoneNumber && workerPhoneNumber !== "" ? workerPhoneNumber : "Phone number unavailable"}</Text>
+          
+        </View>
       </View>
 
       {/* Service Fee and Discount */}
@@ -54,9 +58,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   workerImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 70,
+    height: 70,
+    borderWidth: 1,
+    borderRadius: 100,
     marginRight: 16,
   },
   workerName: {

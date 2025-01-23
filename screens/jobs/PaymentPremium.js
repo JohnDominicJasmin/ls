@@ -25,6 +25,7 @@ const BulletPoints = () => {
   const items = [
     "Unlimited Bookings",
     "Exclusive Discounts and Vouchers",
+    "Free warranty of service within 12 hours after service compliance"
   ];
 
   return (
@@ -237,6 +238,7 @@ function PaymentPremium({ route }) {
             />
 
             <UploadReceipt
+            buttonText={"Get Premium"}
               onClickUpload={() => {
                 pickImage();
                 setImageUriError(null);

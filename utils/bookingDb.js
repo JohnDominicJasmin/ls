@@ -15,6 +15,7 @@ import {
   updateDoc,
   average,
   setDoc,
+   getDoc
 } from "firebase/firestore";
 
 async function createBookingService(bookingData, onSuccess, onFailure) {
@@ -232,7 +233,47 @@ async function isDiscountCodeExist(value) {
     throw error;
   }
 }
+async function isVoucherCodeExist(value) {
+  try {
+    if (Platform.OS === "web") {
+      // Web implementation
+      const db = getFirestore();
+      const collectionRef = collection(db, "vouchers");
 
+      // Query for documents where the field matches the value
+      const q = query(collectionRef, where("code", "==", value));
+      const querySnapshot = await getDocs(q);
+
+      // Process the results
+      if (!querySnapshot.empty) {
+        const document = querySnapshot.docs[0]; // Get the first matching document
+        return { id: document.id, ...document.data() }; // Return the data along with document ID
+      } else {
+        console.log("No matching document found.");
+        return null;
+      }
+    } else {
+      // Mobile implementation
+      const collectionRef = firestore().collection("vouchers");
+
+      // Query for documents where the field matches the value
+      const querySnapshot = await collectionRef
+        .where("code", "==", value)
+        .get();
+
+      if (!querySnapshot.empty) {
+        const document = querySnapshot.docs[0]; // Get the first matching document
+        return { id: document.id, ...document.data() }; // Return the data along with document ID
+      } else {
+        console.log("No matching document found.");
+        return null;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching document by field:", error);
+    throw error;
+  }
+}
 const cancelBookingMobile = async (bookingId) => {
   await firestore()
     .collection("appointments")
@@ -351,12 +392,131 @@ const markAsRatedMobile = async (bookingId) => {
     }
   };
 
+
+
+ // Mobile: React Native Firebase
+const getAppointmentMobile = async (documentId, onSuccess, onFailure) => {
+  try {
+    const documentRef = firestore().collection("appointments").doc(documentId);
+    const documentSnapshot = await documentRef.get();
+
+    if (documentSnapshot.exists) {
+      const data = { id: documentSnapshot.id, ...documentSnapshot.data() };
+      if (onSuccess) onSuccess(data);
+      return data;
+    } else {
+      throw new Error("Document not found");
+    }
+  } catch (error) {
+    console.error("Error fetching appointment (Mobile):", error);
+    if (onFailure) onFailure(error);
+    throw error;
+  }
+};
+
+// Web: Firebase Web SDK
+const getAppointmentWeb = async (documentId, onSuccess, onFailure) => {
+  try {
+    const firestoreInstance = getFirestore();
+    const documentRef = doc(firestoreInstance, "appointments", documentId);
+    const documentSnapshot = await getDoc(documentRef);
+
+    if (documentSnapshot.exists()) {
+      const data = { id: documentSnapshot.id, ...documentSnapshot.data() };
+      if (onSuccess) onSuccess(data);
+      return data;
+    } else {
+      throw new Error("Document not found");
+    }
+  } catch (error) {
+    console.error("Error fetching appointment (Web):", error);
+    if (onFailure) onFailure(error);
+    throw error;
+  }
+};
+
+// Unified Function for Web and Mobile
+const getAppointment = async (documentId, onSuccess, onFailure) => {
+  try {
+    if (Platform.OS === "web") {
+      return await getAppointmentWeb(documentId, onSuccess, onFailure);
+    } else {
+      return await getAppointmentMobile(documentId, onSuccess, onFailure);
+    }
+  } catch (error) {
+    console.error("Error fetching appointment:", error);
+    if (onFailure) onFailure(error);
+    throw error;
+  }
+};
+
+
+async function payService(data, documentId, onSuccess, onFailure) {
+  try {
+    if (Platform.OS === "web") {
+      const db = getFirestore();
+
+      // Specify the document with a custom ID
+      const paymentServiceRef = doc(db, "servicePayment", documentId);
+      await setDoc(paymentServiceRef, data);
+
+      console.log("Pay service created successfully with ID:", documentId);
+      if (onSuccess) {
+        onSuccess(documentId);
+      }
+    } else {
+      const paymentRef = firestore().collection("servicePayment").doc(documentId);
+      await paymentRef.set(data);
+
+      console.log("Pay service created successfully with ID:", documentId);
+      if (onSuccess) {
+        onSuccess(documentId);
+      }
+    }
+  } catch (error) {
+    console.error("Error paying service:", error);
+    if (onFailure) {
+      onFailure(error);
+    }
+  }
+}
+
+const updateAppoinmentStatus = async (documentId, status, onSuccess, onFailure) => {
+
+  try {
+    if (Platform.OS === "web") {
+      const db = getFirestore();
+      const appointmentRef = doc(db, "appointments", documentId);
+      await updateDoc(appointmentRef, { status:status});
+    } else {
+      await firestore().collection("appointments").doc(documentId).update({ status:status });
+    }
+
+    if (onSuccess) {
+      onSuccess(`Status updated to ${status} for appointment ID: ${documentId}`);
+    }
+  } catch (error) {
+    console.error("Error updating appointment status:", error);
+
+    if (onFailure) {
+      onFailure(error);
+    }
+  }
+}
+
+
+
+
 export {
   createBookingService,
   isDiscountCodeExist,
+  isVoucherCodeExist,
   useActiveUserBookings ,
   cancelBooking,
   useDoneUserBookings,
   markAsRated,
-  markAsPaid
+  markAsPaid,
+  getAppointment,
+  payService,
+  updateAppoinmentStatus
 };

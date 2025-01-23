@@ -19,7 +19,9 @@ import DatePicker from "react-native-date-picker";
 import {
   isDiscountCodeExist,
   createBookingService,
+  isVoucherCodeExist,
 } from "../../utils/bookingDb";
+import { decrementUserPoint } from "../../utils/userDb";
 import { firebaseAuth } from "../../firebaseconfig";
 import auth from "@react-native-firebase/auth";
 import Spinner from "react-native-loading-spinner-overlay";
@@ -452,7 +454,7 @@ function WebComponent({
   setMinAmount,
   maxAmount,
   setMaxAmount,
-
+  currentUser,
   onLostFocusMaxAmount,
   onLostFocusMinAmount,
 
@@ -633,7 +635,7 @@ function BookServiceScreen({ route }) {
   const [isAccountPremium, setIsAccountPremium] = useState(false);
 
   const [date, setDate] = useState(new Date());
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
   const [isTimePickerOpen, setTimePickerOpen] = useState(false);
   const [minAmount, setMinAmount] = useState(minPrice);
@@ -672,20 +674,16 @@ function BookServiceScreen({ route }) {
   );
   useEffect(() => {
     const fetchUser = async () => {
-      setIsLoading(true);
+      let currentUser =
+        Platform.OS === "web"
+          ? firebaseAuth.currentUser // Web
+          : auth().currentUser; // Mobile
 
-      let firebaseUser;
-      if (Platform.OS === "web") {
-        firebaseUser = firebaseAuth.currentUser; // Web Firebase Auth
-      } else {
-        firebaseUser = auth().currentUser; // Mobile Firebase Auth
-      }
-
-      setUser(firebaseUser); // Set the user state
+      setUser(currentUser); // Set the user state
+      console.log("Current user is:", currentUser);
     };
 
     fetchUser();
-    setIsLoading(false);
   }, []);
 
   const { user, error } = getUserData(currentUser?.uid);
@@ -711,18 +709,33 @@ function BookServiceScreen({ route }) {
   }, [user]);
 
   const onClickApplyDiscount = React.useCallback(async () => {
-    const result = await isDiscountCodeExist(discountCode);
     if (discountCode == "") {
       setDiscountErrorMessage("Please enter a discount code");
       return;
     }
+    if (discountCode.startsWith("SAVE")) {
+      const result = await isDiscountCodeExist(discountCode);
+      if (result === null) {
+        setDiscountErrorMessage("Discount doesn't exist");
+        return;
+      }
 
-    if (result === null) {
-      setDiscountErrorMessage("Voucher doesn't exist");
+      setDiscountErrorMessage("");
+      setDiscount(result.percentage);
       return;
     }
-    setDiscountErrorMessage("");
-    setDiscount(result.percentage);
+    if (discountCode.startsWith("LS")) {
+      const result = await isVoucherCodeExist(discountCode);
+      if (result === null) {
+        setDiscountErrorMessage("Voucher doesn't exist");
+        return;
+      }
+
+      setDiscountErrorMessage("");
+      setDiscount(result.percentage);
+      return;
+    }
+    setDiscountErrorMessage("Discount/Voucher code doesn't exist");
   }, [discountCode]);
 
   const submitBookingService = () => {
@@ -730,7 +743,7 @@ function BookServiceScreen({ route }) {
       console.log(`Booking created successfully with ID: ${docId}`);
       setIsLoading(false);
       navigation.replace("Main"); // Replace to go directly to MainTabNavigator without the option to go back
-
+      console.log(`User points ${user.points}`);
       navigation.navigate("Bookings");
     };
 
@@ -763,6 +776,8 @@ function BookServiceScreen({ route }) {
       totalAmount: 0,
       workerFullName: "",
       workerPhotoURL: "",
+      workerPhoneNumber: "",
+      workerId: "",
       note: note,
       fullAddress: fullAddress,
       admin_total: 0,

@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from "react-native";
 import Resources from "../src/Resources";
 
-function UploadReceipt({ onClickUpload, onClickSubmit, imageName, uploadReceiptError, handleRemoveFile}) {
+function UploadReceipt({ onClickUpload, onClickSubmit, imageName, uploadReceiptError, handleRemoveFile, buttonText}) {
   return (
     <View style={[styles.container, Platform.OS === 'web' && { maxWidth: '100%' }]}>
 
@@ -54,7 +54,7 @@ function UploadReceipt({ onClickUpload, onClickSubmit, imageName, uploadReceiptE
       
 
       <TouchableOpacity style={styles.button} onPress={onClickSubmit}>
-        <Text style={styles.buttonText}>Get Premium</Text>
+        <Text style={styles.buttonText}>{buttonText}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
   button: {
     width: "90%",
     height: 48,
+    marginTop: 24,
     backgroundColor: "#3366FF", // Blue button color
     justifyContent: "center",
     alignItems: "center",

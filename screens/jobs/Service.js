@@ -92,10 +92,9 @@ const ServiceItem = ({
           )}
 
           <View style={{ flexDirection: "row", gap: 8 }}>
-            <Text style={styles.price}>
+            <Text style={styles.description}> <Text style={styles.price}>
               ₱ {minPrice} - {maxPrice}
-            </Text>
-            <Text style={styles.description}>{asPerDescription}</Text>
+            </Text> {asPerDescription}</Text>
           </View>
         </View>
 
@@ -275,6 +274,7 @@ function ServiceScreen({ route }) {
   const [averageRating, setAverageRating] = useState(0);
 
   const navigateBookService = (item) => {
+    console.log(`Navigating to book service ${item.name}`);
     navigation.navigate("BookService", {
       serviceId: item.id,
       serviceName: item.name,

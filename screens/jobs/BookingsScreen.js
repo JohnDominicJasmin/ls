@@ -58,7 +58,7 @@ const GuestAccountDisplay = ({ onClickCreateAccount, onClickLogin }) => (
     />
   </View>
 );
-const RateAndPaidSection = ({ isRated, onClickRate, onClickPaid }) => {
+const RateAndPaidSection = ({ isRated, isDone, onClickRate, onClickPaid }) => {
   return (
     <>
       <View style={{ flexDirection: "row", gap: 8, marginVertical: 12 }}>
@@ -106,6 +106,7 @@ const RateAndPaidSection = ({ isRated, onClickRate, onClickPaid }) => {
         </TouchableOpacity>
 
         <TouchableOpacity
+        disabled={isDone}
           onPress={onClickPaid}
           style={{
             flex: 1,
@@ -114,7 +115,8 @@ const RateAndPaidSection = ({ isRated, onClickRate, onClickPaid }) => {
             gap: 8,
             paddingVertical: 12,
             alignItems: "center",
-            backgroundColor: Resources.colors.royalBlue,
+            backgroundColor: isDone ? Resources.colors.alto
+            : Resources.colors.royalBlue,
           }}
         >
           <Text
@@ -124,7 +126,7 @@ const RateAndPaidSection = ({ isRated, onClickRate, onClickPaid }) => {
               fontWeight: "semibold",
             }}
           >
-            {"Mark as Paid"}
+            {"Pay Service"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -252,31 +254,16 @@ const DashedDivider = () => {
   return <View style={styles.dashedLine} />;
 };
 function ServiceItem({
-  photoUrl,
-  name,
-  dateCreated,
-  timeCreated,
-  minAmount,
-  maxAmount,
+  item,
+
   isExpanded,
   onClickCancel,
   onExpand,
-  workerId,
-  workerName,
-  workerPhotoUrl,
-  serviceFee,
-  discount,
-  total,
-
-  address,
-  phoneNumber,
-  isPaid,
-  isDone,
-  isActive,
+  
 
   onClickRate,
   onClickPaid,
-  isRated,
+  
 }) {
   return (
     <View style={styles.serviceItem}>
@@ -288,7 +275,7 @@ function ServiceItem({
         }}
       >
         <Image
-          source={{ uri: photoUrl }}
+          source={{ uri: item.servicePhotoUrl }}
           style={{
             height: Platform.OS === "web" ? 200 : 100,
             width: "40%",
@@ -313,7 +300,7 @@ function ServiceItem({
               width: "95%",
             }}
           >
-            {name}
+            {item.bookedService}
           </Text>
 
           <View
@@ -327,21 +314,22 @@ function ServiceItem({
                 paddingRight: 8,
                 borderRightWidth: 1,
                 borderRightColor:
-                  timeCreated === ""
+                item.time === ""
                     ? Resources.colors.white
                     : Resources.colors.boulder,
               }}
             >
-              {dateCreated}
+              {item.date}
             </Text>
-            <Text>{timeCreated}</Text>
+            <Text>{item.time}</Text>
           </View>
 
           <Text
             style={{
-              width: "95%",
+              maxWidth: "100%",
+              paddingRight: 8,
             }}
-          >{`Amount Range: ${minAmount} - ${maxAmount}`}</Text>
+          >{`Amount: ₱${item.minBudget} - ₱${item.maxBudget}`}</Text>
         </View>
       </View>
 
@@ -353,29 +341,28 @@ function ServiceItem({
         >
           <ContactDetail
             style={{ gap: 4 }}
-            address={address}
-            phoneNumber={phoneNumber}
+            address={item.fullAddress}
+            phoneNumber={item.phoneNumber}
           />
           <DashedDivider />
-          {workerName !== "" ? (
+          {item.workerFullName !== "" ? (
             <View>
               <WorkerDetails
-                isPaid={isPaid}
-                workerPhotoUrl={workerPhotoUrl}
-                workerName={workerName}
-                serviceFee={serviceFee}
-                discount={discount}
-                total={total}
+                isPaid={item.isPaid}
+                workerPhotoUrl={item.workerPhotoURL}
+                workerName={item.workerFullName}
+                serviceFee={item.admin_serviceFee}
+                discount={item.admin_discountOrVoucher}
+                total={item.totalAmount}
               />
-              {isActive && !isDone && (
                 <>
                   <RateAndPaidSection
-                    isRated={isRated}
+                  isDone={item.status == "onGoing" || item.isDone}
+                    isRated={item.isRated}
                     onClickPaid={onClickPaid}
                     onClickRate={onClickRate}
                   />
                 </>
-              )}
             </View>
           ) : (
             <>
@@ -407,7 +394,7 @@ function ServiceItem({
         }}
       >
         <View>
-          {!isDone && isActive && (
+          {!item.isDone && item.isActive && (
             <TouchableOpacity onPress={onClickCancel}>
               <Text>{"Cancel"}</Text>
             </TouchableOpacity>
@@ -452,23 +439,7 @@ function MobileContent({
   const renderItem = ({ item, index }) => {
     return (
       <ServiceItem
-        photoUrl={item.servicePhotoUrl}
-        name={item.bookedService}
-        dateCreated={item.date}
-        timeCreated={item.time}
-        minAmount={item.minBudget}
-        maxAmount={item.maxBudget}
-        address={item.fullAddress}
-        phoneNumber={item.phoneNumber}
-        workerId={item.serviceId}
-        isDone={item.isDone}
-        workerName={item.workerFullName}
-        workerPhotoUrl={item.workerPhotoURL}
-        serviceFee={item.admin_serviceFee}
-        discount={item.admin_discountOrVoucher}
-        total={item.totalAmount}
-        isActive={item.isActive}
-        isPaid={item.isPaid}
+        item={item}
         onClickCancel={() => cancelBooking(item.id)}
         onExpand={() => {
           if (itemExpanded == item.id) {
@@ -477,10 +448,11 @@ function MobileContent({
           }
           setItemExpanded(item.id);
         }}
+         
         isExpanded={itemExpanded == item.id}
         onClickPaid={() => onClickPaid(item.id)}
         onClickRate={() => onClickRate(item)}
-        isRated={item.isRated}
+
       />
     );
   };
@@ -496,9 +468,6 @@ function MobileContent({
     >
 
 
-      <View style={{
-        flexDirection: 'column'
-      }}>
       <Indicator
         indicatorActive={indicatorActive}
         selectIndicator={selectIndicator}
@@ -519,7 +488,6 @@ function MobileContent({
         keyExtractor={(item, index) => index.toString()} // Use a unique key if available
       />
       </View>
-    </View>
   );
 }
 
@@ -623,24 +591,29 @@ function BookingsScreen() {
 
   const onClickPaid = React.useCallback(
     async (id) => {
-      await markAsPaid(
-        id,
-        () => {
-          incrementUserPoint(
-            user?.uid,
-            1,
-            () => {
-              console.log(`Paid successfully`);
-            },
-            () => {
-              console.log(`Paid failed`);
-            }
-          );
-        },
-        () => {
-          console.log(`Paid failed`);
-        }
-      );
+      navigation.navigate("ServicePayment", {
+        serviceId: id, 
+        userId: user?.uid,
+        name: user
+      })  
+      // await markAsPaid(
+      //   id,
+      //   () => {
+      //     incrementUserPoint(
+      //       user?.uid,
+      //       1,
+      //       () => {
+      //         console.log(`Paid successfully`);
+      //       },
+      //       () => {
+      //         console.log(`Paid failed`);
+      //       }
+      //     );
+      //   },
+      //   () => {
+      //     console.log(`Paid failed`);
+      //   }
+      // );
     },
     [user?.uid]
   );
